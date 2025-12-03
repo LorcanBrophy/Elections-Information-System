@@ -1,0 +1,116 @@
+.root {
+    -fx-background-color: #ececec; /* slightly darker for contrast */
+}
+
+.label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d2d2d;
+}
+
+/* BUTTON */
+
+.button {
+    -fx-background-color: #dddddd;
+    -fx-text-fill: #333333;
+    -fx-font-size: 16px;
+}
+
+.button:hover {
+    -fx-background-color: #cbcbcb;
+    -fx-cursor: hand;
+}
+
+/* LISTVIEW */
+
+.list-view {
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-border-color: #bdbdbd; /* stronger contrast */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+}
+
+.list-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cecece;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #1a1a1a;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #d2d2d2;
+}
+
+.list-cell:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+/* TABLEVIEW */
+
+.table-view {
+    -fx-background-color: #fafafa;
+    -fx-control-inner-background: #ffffff;
+    -fx-table-cell-border-color: #c8c8c8;
+    -fx-border-color: #bdbdbd;
+    -fx-border-width: 1;
+}
+
+.table-view .column-header {
+    -fx-background-color: #e2e2e2;
+    -fx-border-color: #c2c2c2;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333;
+}
+
+/* TAB */
+
+.tab-pane {
+    -fx-tab-min-width: 90px;
+    -fx-border-color: none;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #dedede;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #e4e4e4;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.tab-pane .tab:hover {
+    -fx-background-color: #d2d2d2;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #c6c6c6;
+    -fx-border-color: #8f8f8f;
+    -fx-border-width: 0 0 3px 0;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #000;
+}
+
+/* DIALOG */
+
+.dialog-pane {
+    -fx-background-color: #f7f7f7;
+    -fx-border-color: #bcbcbc;
+    -fx-border-width: 2;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #e1e1e1;
+    -fx-padding: 10;
+}
+
+.dialog-pane .label {
+    -fx-text-fill: #2d2d2d;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}

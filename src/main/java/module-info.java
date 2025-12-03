@@ -5,4 +5,6 @@ module com.example.electionsinformationsystem {
 
     opens com.example.electionsinformationsystem to javafx.fxml;
     exports com.example.electionsinformationsystem;
+    exports com.example.electionsinformationsystem.models;
+    opens com.example.electionsinformationsystem.models to javafx.fxml;
 }

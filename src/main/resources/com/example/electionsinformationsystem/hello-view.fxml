@@ -15,8 +15,22 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
 
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+
 <TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.electionsinformationsystem.HelloController">
-    <Tab text="Main Menu" closable="false"> </Tab>
+    <Tab text="Main Menu" closable="false">
+        <VBox spacing="15">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20"/>
+            </padding>
+
+            <HBox spacing="10">
+                <ComboBox fx:id="themePicker" onAction="#onChangeTheme" />
+            </HBox>
+        </VBox>
+    </Tab>
 
     <Tab text="Politicians" closable="false">
         <VBox spacing="15">
@@ -24,30 +38,43 @@
                 <Insets bottom="20" left="20" right="20" top="20"/>
             </padding>
 
-            <HBox spacing="10">
-                <Button text="Toggle Light/Dark" onAction="#onToggleTheme" />
-            </HBox>
-
             <HBox spacing="20" VBox.vgrow="ALWAYS">
                 <VBox spacing="10" HBox.hgrow="NEVER" VBox.vgrow="ALWAYS">
                     <Label text="Politicians"/>
-                    <ListView fx:id="politicianListView" VBox.vgrow="ALWAYS"/>
                     <HBox spacing="5">
                         <Button text="Add" onAction="#onAddPolitician"/>
                         <Button text="Edit" onAction="#onEditPolitician"/>
                         <Button text="Remove" onAction="#onRemovePolitician"/>
                     </HBox>
+                    <ListView fx:id="politicianListView" VBox.vgrow="ALWAYS"/>
                 </VBox>
 
                 <VBox spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+
+                    <HBox>
+                        <Pane HBox.hgrow="ALWAYS"/>
+                        <TextField promptText= "Search for Politician" fx:id="politicianSearhResult"> </TextField>
+                        <Button text="🔍" onAction="#onSearchPolitician"/>
+                    </HBox>
+
+
                     <Label text="Politician Details"/>
-                    <TableView fx:id="politicianTableView" VBox.vgrow="ALWAYS">
+                    <TableView fx:id="politicianTableView" VBox.vgrow="NEVER">
                         <columns>
                             <TableColumn text="Name" fx:id="nameColumn"/>
                             <TableColumn text="Date of Birth (Y/M/D)" fx:id="dobColumn"/>
                             <TableColumn text="Party" fx:id="partyColumn"/>
                             <TableColumn text="Home County" fx:id="countyColumn"/>
                             <TableColumn text="Photo URL" fx:id="photoColumn"/>
+                        </columns>
+                    </TableView>
+
+                    <Label text="Election Details"/>
+                    <TableView fx:id="politicianElectionTableView" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn text="Election Name"/>
+                            <TableColumn text="Election Type"/>
+                            <TableColumn text="No. Votes"/>
                         </columns>
                     </TableView>
                 </VBox>

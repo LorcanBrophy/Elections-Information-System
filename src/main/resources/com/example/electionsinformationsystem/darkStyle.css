@@ -171,3 +171,11 @@
 .date-picker-popup .day-cell:selected {
     -fx-background-color: #5a5a5a;
 }
+
+.text-field {
+    -fx-background-color: #3a3a3a;;
+    -fx-border-color: #121212;
+    -fx-text-fill: #a6a4a4;
+    -fx-prompt-text-fill: #a6a4a4;
+    -fx-font-size: 16px;
+}

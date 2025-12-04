@@ -1,10 +1,9 @@
-package com.example.electionsinformationsystem;
+package com.example.electionsinformationsystem.controllers;
 
 import com.example.electionsinformationsystem.models.Election;
+import com.example.electionsinformationsystem.models.HashTableSC;
 import com.example.electionsinformationsystem.models.LinkedList;
 import com.example.electionsinformationsystem.models.Politician;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,7 +14,20 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.util.Objects;
 
 public class HelloController {
+
+    // for iterating
     private final LinkedList<Politician> politicianLinkedList = new LinkedList<>();
+
+    // for fast lookups when searching
+
+    // exact lookups by name (single politician per key)
+    private final HashTableSC<String, Politician> nameHashTable = new HashTableSC<>(20);
+
+    // exact lookups by party (multiple politicians per party)
+    private final HashTableSC<String, LinkedList<Politician>> partyHashTable = new HashTableSC<>(20);
+
+    // exact lookups by county (multiple politicians per county)
+    private final HashTableSC<String, LinkedList<Politician>> countyHashTable = new HashTableSC<>(20);
 
     @FXML
     private ListView<Politician> politicianListView;
@@ -38,20 +50,15 @@ public class HelloController {
     public TableView<Election> politicianElectionTableView;
 
     @FXML
-    private TableColumn<Election, String> electionPartyColumn;
-    @FXML
-    private TableColumn<Election, Integer> numVotesColumn;
-
-    @FXML
     private ComboBox<String> themePicker;
 
     @FXML
-    private TextField politicianSearhResult;
+    private TextField politicianSearchResult;
 
 
 
 
-    @FXML @SuppressWarnings("deprecation")
+    @FXML
     public void initialize() {
         // set up table columns to pull their values from Politician fields
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("politicianName"));
@@ -97,30 +104,72 @@ public class HelloController {
     // TODO NEED TO ADD FILTERING AND SORTING FOR SEARCH PROB
     @FXML
     public void onSearchPolitician() {
-        String query = politicianSearhResult.getText().trim().toLowerCase();
+        String query = politicianSearchResult.getText().trim().toLowerCase();
+
+        // clear old list view
+        politicianListView.getItems().clear();
+
+
+        // if search bar is empty, add all back to list
         if (query.isEmpty()) {
-            politicianListView.getItems().clear();
             for (Politician p : politicianLinkedList) {
                 politicianListView.getItems().add(p);
             }
             return;
         }
 
+        // exact search : hash lookup
+        long hashStart = System.nanoTime();
+
+        // name
+        Politician exactMatchName = nameHashTable.get(query.toLowerCase());
+        if (exactMatchName != null) {
+            long hashEnd = System.nanoTime();
+            System.out.println("hash table lookup time: " + (hashEnd - hashStart) + " ns");
+            politicianListView.getItems().add(exactMatchName);
+            return;
+        }
+
+        // party
+        LinkedList<Politician> partyMatchList = partyHashTable.get(query);
+        if (partyMatchList != null) {
+            for (Politician exactMatchParty : partyMatchList) {
+                politicianListView.getItems().add(exactMatchParty);
+            }
+            return;
+        }
+
+        // county
+        LinkedList<Politician> countyMatchList = countyHashTable.get(query);
+        if (countyMatchList != null) {
+            for (Politician exactMatchCounty : countyMatchList) {
+                politicianListView.getItems().add(exactMatchCounty);
+            }
+            return;
+        }
+
+        long listStart = System.nanoTime();
+
+
+        // partial search : iterate through linked list
         LinkedList<Politician> matches = new LinkedList<>();
-        for (Politician politician : politicianLinkedList) {
-            boolean matchesName = politician.getPoliticianName().toLowerCase().contains(query);
-            boolean matchesParty = politician.getPoliticalParty().toLowerCase().contains(query);
-            boolean matchesCounty = politician.getHomeCounty().toLowerCase().contains(query);
+
+        for (Politician partialMatch : politicianLinkedList) {
+            boolean matchesName = partialMatch.getPoliticianName().toLowerCase().contains(query);
+            boolean matchesParty = partialMatch.getPoliticalParty().toLowerCase().contains(query);
+            boolean matchesCounty = partialMatch.getHomeCounty().toLowerCase().contains(query);
 
             if (matchesName || matchesParty || matchesCounty) {
-                matches.add(politician);
+                matches.add(partialMatch);
             }
         }
 
-        politicianListView.getItems().clear();
-        for (Politician p : matches) {
-            politicianListView.getItems().add(p);
+        for (Politician politician : matches) {
+            politicianListView.getItems().add(politician);
         }
+
+        long listEnd = System.nanoTime();
+        System.out.println("linked list search took: " + (listEnd - listStart) + " ns");
     }
 
     @FXML
@@ -128,11 +177,33 @@ public class HelloController {
         Politician newPolitician = politicianDialog(null);
         if (newPolitician == null) return;
 
+        // name hash table, no duplicated names
+        nameHashTable.put(newPolitician.getPoliticianName().toLowerCase(), newPolitician);
+
+        // party hash table
+        LinkedList<Politician> partyList = partyHashTable.get(newPolitician.getPoliticalParty().toLowerCase());
+        if (partyList == null) {
+            partyList = new LinkedList<>();
+            partyHashTable.put(newPolitician.getPoliticalParty().toLowerCase(), partyList);
+        }
+        partyList.add(newPolitician);
+
+        // home county hash table
+        LinkedList<Politician> countyList = countyHashTable.get(newPolitician.getHomeCounty().toLowerCase());
+        if (countyList == null) {
+            countyList = new LinkedList<>();
+            countyHashTable.put(newPolitician.getHomeCounty().toLowerCase(), countyList);
+        }
+        countyList.add(newPolitician);
+
+
         politicianLinkedList.add(newPolitician);
         politicianListView.getItems().add(newPolitician);
 
-        System.out.println("Number of politicians: " + politicianLinkedList.size());
-        System.out.println(politicianLinkedList.display());
+        System.out.println("-------------------------------------------\nNumber of politicians: " + politicianLinkedList.size());
+        //System.out.println(politicianLinkedList.display());
+        //nameHashTable.printTable();
+        //countyHashTable.printTable();
     }
 
     @FXML
@@ -147,6 +218,7 @@ public class HelloController {
     }
 
     @FXML
+    // TODO need to delete from hash also
     public void onRemovePolitician() {
         Politician selected = politicianListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
@@ -173,9 +245,9 @@ public class HelloController {
         if (selectedTheme == null) return;
 
         String cssFile = switch (selectedTheme) {
-            case "Dark Mode" -> "darkStyle.css";
-            case "Cotton Candy" -> "pinkStyle.css";
-            default -> "lightStyle.css";
+            case "Dark Mode" -> "/com/example/electionsinformationsystem/darkStyle.css";
+            case "Cotton Candy" -> "/com/example/electionsinformationsystem/pinkStyle.css";
+            default -> "/com/example/electionsinformationsystem/lightStyle.css";
         };
 
         root.getStylesheets().add(Objects.requireNonNull(getClass().getResource(cssFile)).toExternalForm());

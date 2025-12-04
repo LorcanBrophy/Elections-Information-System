@@ -1,12 +1,12 @@
 package com.example.electionsinformationsystem.models;
 
-public class Node<T> {
+public class LLNode<T> {
     // fields
     private final T data; // the data stored in this node
-    public Node<T> next; // reference to next node
+    public LLNode<T> next; // reference to next node
 
     // constructor
-    public Node(T data) {
+    public LLNode(T data) {
         this.data = data;
         this.next = null;
     }
@@ -16,11 +16,11 @@ public class Node<T> {
         return data;
     }
 
-    public Node<T> getNext() {
+    public LLNode<T> getNext() {
         return next;
     }
 
-    public void setNext(Node<T> next) {
+    public void setNext(LLNode<T> next) {
         this.next = next;
     }
 }

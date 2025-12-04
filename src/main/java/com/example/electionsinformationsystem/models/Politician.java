@@ -5,8 +5,8 @@ public class Politician {
     // fields
     String politicianName;
     String dateOfBirth;
-    String politicalParty; // defaults to 'Independent' if empty
-    String homeCounty; // might make this an enum list
+    String politicalParty; // should default to 'Independent' if empty, in dialog just make "if null, set Independant"
+    String homeCounty;
     String photoUrl;
     private Election[] electionRecord;
 
@@ -62,12 +62,10 @@ public class Politician {
 
     @Override
     public String toString() {
-        return "Politician {" +
-                "\n  Name: " + politicianName +
-                "\n  DoB: " + dateOfBirth +
-                "\n  Party: " + politicalParty +
-                "\n  County: " + homeCounty +
-                "\n  Photo URL: " + photoUrl +
-                "\n}";
+        return "Politician: " + politicianName
+                + " | DoB: " + dateOfBirth
+                + " | Party: " + politicalParty
+                + " | County: " + homeCounty
+                + " | Photo: " + photoUrl;
     }
 }

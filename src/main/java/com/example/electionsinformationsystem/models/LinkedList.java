@@ -3,12 +3,12 @@ package com.example.electionsinformationsystem.models;
 public class LinkedList<T> implements Iterable<T> {
 
     // fields
-    private Node<T> head = null;
+    private LLNode<T> head = null;
     private int size;
 
     // add elements to end of linked list
     public void add(T data) {
-        Node<T> nn = new Node<>(data);
+        LLNode<T> nn = new LLNode<>(data);
 
         // list empty, add to head
         if (head == null) {
@@ -18,7 +18,7 @@ public class LinkedList<T> implements Iterable<T> {
         }
 
         // loop through list till at the final element
-        Node<T> temp = head;
+        LLNode<T> temp = head;
         while (temp.getNext() != null) {
             temp = temp.getNext();
         }
@@ -40,7 +40,7 @@ public class LinkedList<T> implements Iterable<T> {
         }
 
         // move through the list looking for the node to remove
-        Node<T> temp = head;
+        LLNode<T> temp = head;
         while (temp.getNext() != null) {
             if (temp.getNext().getData().equals(data)) {
                 temp.setNext(temp.getNext().getNext()); // change pointer to skip over the element

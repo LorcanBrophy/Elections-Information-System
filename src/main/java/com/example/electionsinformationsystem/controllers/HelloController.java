@@ -1,7 +1,6 @@
 package com.example.electionsinformationsystem.controllers;
 
 import com.example.electionsinformationsystem.models.*;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -347,11 +346,11 @@ public class HelloController {
         Election selected = electionListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
-        LinkedList<Election> electionTypeList = electionTypeHashTable.get(selected.getElectionType().toLowerCase());
+        LinkedList<Election> electionTypeList = electionTypeHashTable.get(selected.getElectionType());
         if (electionTypeList != null) electionTypeList.remove(selected);
 
         LinkedList<Election> electionDateList = electionDateHashTable.get(selected.getElectionDate());
-        if (electionDateList != null) electionTypeList.remove(selected);
+        if (electionDateList != null) electionDateList.remove(selected);
 
         electionLinkedList.remove(selected);
         electionListView.getItems().remove(selected);
@@ -463,7 +462,7 @@ public class HelloController {
         String prefillElectionType = existing != null ? existing.getElectionType() : "";
         String prefillLocation = existing != null ? existing.getLocation() : "";
         String prefillElectionDate = existing != null ? existing.getElectionDate() : "";
-        int prefillNumWinners = existing != null ? existing.getNumWinners() : 0;
+        int prefillNumWinners = existing != null ? existing.getNumWinners() : 1;
 
         String dialogTitle = (existing != null) ? "Edit Election" : "Add Election";
 

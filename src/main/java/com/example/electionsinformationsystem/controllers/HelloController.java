@@ -542,21 +542,7 @@ public class HelloController {
                 "Waterford", "Westmeath", "Wexford", "Wicklow"
         );
 
-
-        // prefill if editing
-        if (prefillCounty != null && !prefillCounty.isEmpty()) {
-            countyCombo.setValue(prefillCounty);
-        }
-
-        countyDialog.getDialogPane().setContent(countyCombo);
-
-        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        countyDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
-
-        countyDialog.setResultConverter(button -> button == ok ? countyCombo.getValue() : null);
-
-        return countyDialog.showAndWait().orElse(null);
+        return showComboDialog(countyCombo, countyDialog, prefillCounty);
     }
 
     @FXML
@@ -580,19 +566,7 @@ public class HelloController {
                 "Sligo–Leitrim", "Tipperary", "Waterford", "Wexford", "Wicklow"
         );
 
-        if (prefill != null && !prefill.isEmpty()) {
-            constituencyCombo.setValue(prefill);
-        }
-
-        generalDialog.getDialogPane().setContent(constituencyCombo);
-
-        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        generalDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
-
-        generalDialog.setResultConverter(button -> button == ok ? constituencyCombo.getValue() : "");
-
-        return generalDialog.showAndWait().orElse(null);
+        return showComboDialog(constituencyCombo, generalDialog, prefill);
     }
 
     @FXML
@@ -606,17 +580,26 @@ public class HelloController {
         ComboBox<String> euroCombo = new ComboBox<>();
         euroCombo.getItems().addAll("Dublin", "South", "Midlands–North-West");
 
+        return showComboDialog(euroCombo, dialog, prefill);
+    }
+
+    @FXML
+    private String showComboDialog(ComboBox<String> comboBox, Dialog<String> dialog, String prefill) {
+
         if (prefill != null && !prefill.isEmpty()) {
-            euroCombo.setValue(prefill);
+            comboBox.setValue(prefill);
         }
 
-        dialog.getDialogPane().setContent(euroCombo);
+        dialog.getDialogPane().setContent(comboBox);
 
         ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
 
-        dialog.setResultConverter(button -> button == ok ? euroCombo.getValue() : null);
+        dialog.getDialogPane().getButtonTypes().setAll(ok, cancel);
+
+        dialog.setResultConverter(button ->
+                button == ok ? comboBox.getValue() : null
+        );
 
         return dialog.showAndWait().orElse(null);
     }
@@ -633,19 +616,7 @@ public class HelloController {
         electionTypeCombo.getItems().addAll("Local", "General", "European", "Presidential");
         electionTypeCombo.setEditable(false);
 
-        if (prefillElectionType != null && !prefillElectionType.isEmpty()) {
-            electionTypeCombo.setValue(prefillElectionType);
-        }
-
-        electionTypeDialog.getDialogPane().setContent(electionTypeCombo);
-
-        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        electionTypeDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
-
-        electionTypeDialog.setResultConverter(button -> button == ok ? electionTypeCombo.getValue() : null);
-
-        return electionTypeDialog.showAndWait().orElse(null);
+        return showComboDialog(electionTypeCombo, electionTypeDialog, prefillElectionType);
     }
 
     @FXML

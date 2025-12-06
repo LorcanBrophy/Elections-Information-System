@@ -1,9 +1,7 @@
 package com.example.electionsinformationsystem.controllers;
 
-import com.example.electionsinformationsystem.models.Election;
-import com.example.electionsinformationsystem.models.HashTableSC;
-import com.example.electionsinformationsystem.models.LinkedList;
-import com.example.electionsinformationsystem.models.Politician;
+import com.example.electionsinformationsystem.models.*;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,46 +13,36 @@ import java.util.Objects;
 
 public class HelloController {
 
-    // for iterating
+    // linked lists for iteration, display, etc.
     private final LinkedList<Politician> politicianLinkedList = new LinkedList<>();
+    private final LinkedList<Election> electionLinkedList = new LinkedList<>();
 
-    // for fast lookups when searching
-
-    // exact lookups by name (single politician per key)
+    // hash tables for fast lookups
     private final HashTableSC<String, Politician> nameHashTable = new HashTableSC<>(20);
-
-    // exact lookups by party (multiple politicians per party)
     private final HashTableSC<String, LinkedList<Politician>> partyHashTable = new HashTableSC<>(20);
-
-    // exact lookups by county (multiple politicians per county)
     private final HashTableSC<String, LinkedList<Politician>> countyHashTable = new HashTableSC<>(20);
+    private final HashTableSC<String, LinkedList<Election>> electionTypeHashTable = new HashTableSC<>(20);
+    private final HashTableSC<String, LinkedList<Election>> electionDateHashTable = new HashTableSC<>(20);
 
-    @FXML
-    private ListView<Politician> politicianListView;
+    // politician tab
+    @FXML private ListView<Politician> politicianListView;
+    @FXML private TextField politicianSearchResult;
 
-    @FXML
-    public TableView<Politician> politicianTableView;
+    @FXML private TableView<Politician> politicianTableView;
+    @FXML private TableColumn<Politician, String> nameColumn;
+    @FXML private TableColumn<Politician, String> dobColumn;
+    @FXML private TableColumn<Politician, String> partyColumn;
+    @FXML private TableColumn<Politician, String> countyColumn;
+    @FXML private TableColumn<Politician, String> photoColumn;
 
-    @FXML
-    private TableColumn<Politician, String> nameColumn;
-    @FXML
-    private TableColumn<Politician, String> dobColumn;
-    @FXML
-    private TableColumn<Politician, String> partyColumn;
-    @FXML
-    private TableColumn<Politician, String> countyColumn;
-    @FXML
-    private TableColumn<Politician, String> photoColumn;
+    @FXML private TableView<Election> politicianElectionTableView;
 
-    @FXML
-    public TableView<Election> politicianElectionTableView;
+    @FXML private ComboBox<String> themePicker;
 
-    @FXML
-    private ComboBox<String> themePicker;
-
-    @FXML
-    private TextField politicianSearchResult;
-
+    // election tab
+    @FXML public ListView<Election> electionListView;
+    @FXML public TextField electionSearchResult;
+    @FXML public ListView<Candidate> candidateListView;
 
 
 
@@ -90,7 +78,7 @@ public class HelloController {
         });
 
         themePicker.getItems().addAll("Light Mode", "Dark Mode", "Cotton Candy");
-        themePicker.getSelectionModel().select("Light Mode");
+        themePicker.getSelectionModel().selectFirst();
     }
 
     @FXML
@@ -101,7 +89,10 @@ public class HelloController {
         applyStylesheet(scene.getRoot());
     }
 
-    // TODO NEED TO ADD FILTERING AND SORTING FOR SEARCH PROB
+    // TODO NEED TO ADD FILTERING AND SORTING FOR SEARCH IDK
+
+    // politician buttons
+
     @FXML
     public void onSearchPolitician() {
         String query = politicianSearchResult.getText().trim().toLowerCase();
@@ -119,13 +110,10 @@ public class HelloController {
         }
 
         // exact search : hash lookup
-        long hashStart = System.nanoTime();
 
         // name
         Politician exactMatchName = nameHashTable.get(query.toLowerCase());
         if (exactMatchName != null) {
-            long hashEnd = System.nanoTime();
-            System.out.println("hash table lookup time: " + (hashEnd - hashStart) + " ns");
             politicianListView.getItems().add(exactMatchName);
             return;
         }
@@ -148,8 +136,6 @@ public class HelloController {
             return;
         }
 
-        long listStart = System.nanoTime();
-
 
         // partial search : iterate through linked list
         LinkedList<Politician> matches = new LinkedList<>();
@@ -167,9 +153,6 @@ public class HelloController {
         for (Politician politician : matches) {
             politicianListView.getItems().add(politician);
         }
-
-        long listEnd = System.nanoTime();
-        System.out.println("linked list search took: " + (listEnd - listStart) + " ns");
     }
 
     @FXML
@@ -200,16 +183,56 @@ public class HelloController {
         politicianLinkedList.add(newPolitician);
         politicianListView.getItems().add(newPolitician);
 
-        System.out.println("-------------------------------------------\nNumber of politicians: " + politicianLinkedList.size());
-        //System.out.println(politicianLinkedList.display());
+        System.out.println("Number of politicians: " + politicianLinkedList.size());
+        System.out.println(politicianLinkedList.display());
         //nameHashTable.printTable();
         //countyHashTable.printTable();
     }
 
     @FXML
     public void onEditPolitician() {
-        Politician toEdit = politicianDialog(politicianListView.getSelectionModel().getSelectedItem());
-        if (toEdit == null) return;
+        Politician selected = politicianListView.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        String oldName = selected.getPoliticianName().toLowerCase();
+        String oldParty = selected.getPoliticalParty().toLowerCase();
+        String oldCounty = selected.getHomeCounty().toLowerCase();
+
+        Politician edited = politicianDialog(selected);
+        if (edited == null) return;
+
+        if (!oldName.equals(edited.getPoliticianName().toLowerCase())) {
+            nameHashTable.remove(oldName);
+            nameHashTable.put(edited.getPoliticianName().toLowerCase(), edited);
+        }
+
+        if (!oldParty.equals(edited.getPoliticalParty().toLowerCase())) {
+
+            // remove from old list
+            LinkedList<Politician> oldPartyList = partyHashTable.get(oldParty);
+            oldPartyList.remove(selected);
+
+            LinkedList<Politician> newPartyList = partyHashTable.get(edited.getPoliticalParty().toLowerCase());
+
+            if (newPartyList == null) {
+                newPartyList = new LinkedList<>();
+                partyHashTable.put(edited.getPoliticalParty().toLowerCase(), newPartyList);
+            }
+            newPartyList.add(edited);
+        }
+
+        if (!oldCounty.equals(edited.getHomeCounty().toLowerCase())) {
+            LinkedList<Politician> oldCountyList = countyHashTable.get(oldCounty);
+            oldCountyList.remove(selected);
+
+            LinkedList<Politician> newCountyList = countyHashTable.get(edited.getHomeCounty().toLowerCase());
+
+            if (newCountyList == null) {
+                newCountyList = new LinkedList<>();
+                countyHashTable.put(edited.getHomeCounty().toLowerCase(), newCountyList);
+            }
+            newCountyList.add(edited);
+        }
 
         politicianListView.refresh();
 
@@ -218,10 +241,17 @@ public class HelloController {
     }
 
     @FXML
-    // TODO need to delete from hash also
     public void onRemovePolitician() {
         Politician selected = politicianListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
+
+        nameHashTable.remove(selected.getPoliticianName().toLowerCase());
+
+        LinkedList<Politician> partyList = partyHashTable.get(selected.getPoliticalParty().toLowerCase());
+        if (partyList != null) partyList.remove(selected);
+
+        LinkedList<Politician> countyList = countyHashTable.get(selected.getHomeCounty().toLowerCase());
+        if (countyList != null) countyList.remove(selected);
 
         politicianLinkedList.remove(selected);
         politicianListView.getItems().remove(selected);
@@ -230,8 +260,119 @@ public class HelloController {
         System.out.println(politicianLinkedList.display());
     }
 
+    // election buttons
 
+    @FXML
+    public void onSearchElection() {
+    }
 
+    @FXML
+    public void onAddElection() {
+        Election newElection = electionDialog(null);
+        if (newElection == null) return;
+
+        LinkedList<Election> electionTypeList = electionTypeHashTable.get(newElection.getElectionType());
+        if (electionTypeList == null) {
+            electionTypeList = new LinkedList<>();
+            electionTypeHashTable.put(newElection.getElectionType(), electionTypeList);
+        }
+        electionTypeList.add(newElection);
+
+        LinkedList<Election> electionDateList = electionDateHashTable.get(newElection.getElectionDate());
+        if (electionDateList == null) {
+            electionDateList = new LinkedList<>();
+            electionDateHashTable.put(newElection.getElectionDate(), electionDateList);
+        }
+        electionDateList.add(newElection);
+
+        electionLinkedList.add(newElection);
+        electionListView.getItems().add(newElection);
+
+        System.out.println("Number of elections: " + electionLinkedList.size());
+        System.out.println(electionLinkedList.display());
+        //System.out.println(newElection.toString());
+        //System.out.println("Election Type Hash Table");
+        //electionTypeHashTable.printTable();
+        //System.out.println("Election Date Hash Table");
+        //electionDateHashTable.printTable();
+    }
+
+    @FXML
+    public void onEditElection() {
+        Election selected = electionListView.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        String oldElectionType = selected.getElectionType();
+        String oldElectionDate = selected.getElectionDate();
+
+        Election edited = electionDialog(selected);
+        if (edited == null) return;
+
+        if (!oldElectionType.equals(edited.getElectionType())) {
+
+            // remove from old list
+            LinkedList<Election> oldElectionTypeList = electionTypeHashTable.get(oldElectionType);
+            oldElectionTypeList.remove(selected);
+
+            LinkedList<Election> newElectionTypeList = electionTypeHashTable.get(edited.getElectionType());
+
+            if (newElectionTypeList == null) {
+                newElectionTypeList = new LinkedList<>();
+                electionTypeHashTable.put(edited.getElectionType(), newElectionTypeList);
+            }
+            newElectionTypeList.add(edited);
+        }
+
+        if (!oldElectionDate.equals(edited.getElectionDate())) {
+            LinkedList<Election> oldElectionDateList = electionDateHashTable.get(oldElectionDate);
+            oldElectionDateList.remove(selected);
+
+            LinkedList<Election> newElectionDateList = electionDateHashTable.get(edited.getElectionDate());
+
+            if (newElectionDateList == null) {
+                newElectionDateList = new LinkedList<>();
+                electionDateHashTable.put(edited.getElectionDate(), newElectionDateList);
+            }
+            newElectionDateList.add(edited);
+        }
+
+        electionListView.refresh();
+
+        System.out.println("Number of elections: " + electionLinkedList.size());
+        System.out.println(electionLinkedList.display());
+    }
+
+    @FXML
+    public void onRemoveElection() {
+        Election selected = electionListView.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        LinkedList<Election> electionTypeList = electionTypeHashTable.get(selected.getElectionType().toLowerCase());
+        if (electionTypeList != null) electionTypeList.remove(selected);
+
+        LinkedList<Election> electionDateList = electionDateHashTable.get(selected.getElectionDate());
+        if (electionDateList != null) electionTypeList.remove(selected);
+
+        electionLinkedList.remove(selected);
+        electionListView.getItems().remove(selected);
+
+        System.out.println("Number of elections: " + electionLinkedList.size());
+        System.out.println(electionLinkedList.display());
+    }
+
+    // candidate buttons
+
+    @FXML
+    public void onAddCandidate() {
+    }
+
+    @FXML
+    public void onEditCandidate() {
+    }
+
+    @FXML
+    public void onRemoveCandidate() {
+    }
 
     // HELPER METHODS
 
@@ -276,7 +417,7 @@ public class HelloController {
         if (politicianName.isEmpty()) return null;
 
         // date of birth
-        String dateOfBirth = calenderDialog(prefillDob, dialogTitle);
+        String dateOfBirth = calenderDialog(prefillDob, dialogTitle, "Enter Date of Birth:");
         if (dateOfBirth == null || dateOfBirth.isEmpty()) return null;
 
         // political party dialog
@@ -317,32 +458,69 @@ public class HelloController {
     }
 
     @FXML
-    private String calenderDialog(String prefillDob, String dialogTitle) {
+    private Election electionDialog(Election existing) {
+        // prefill values if editing
+        String prefillElectionType = existing != null ? existing.getElectionType() : "";
+        String prefillLocation = existing != null ? existing.getLocation() : "";
+        String prefillElectionDate = existing != null ? existing.getElectionDate() : "";
+        int prefillNumWinners = existing != null ? existing.getNumWinners() : 0;
+
+        String dialogTitle = (existing != null) ? "Edit Election" : "Add Election";
+
+        // election type
+        String electionType = electionTypeDialog(prefillElectionType, dialogTitle);
+        if (electionType == null || electionType.isEmpty()) return null;
+
+        // election location
+        String location = locationDialog(prefillLocation, dialogTitle, electionType);
+        if (location == null || location.isEmpty()) return null;
+
+        // election date
+        String electionDate = calenderDialog(prefillElectionDate, dialogTitle, "Select Election Date:");
+        if (electionDate == null || electionDate.isEmpty()) return null;
+
+        // num winners
+        int numWinners;
+        if (electionType.equalsIgnoreCase("Presidential")) {
+            numWinners = 1;
+        } else {
+            Integer userInput = numberDialog(
+                    prefillNumWinners > 0 ? prefillNumWinners : 1, dialogTitle, "Enter Number of Winners:"
+            );
+            if (userInput == null) return null;
+            numWinners = userInput;
+        }
+        if (existing == null) return new Election(electionType, location, electionDate, numWinners);
+
+        existing.setElectionType(electionType);
+        existing.setLocation(location);
+        existing.setElectionDate(electionDate);
+        existing.setNumWinners(numWinners);
+
+        return existing;
+    }
+
+    @FXML
+    private String calenderDialog(String prefillDob, String dialogTitle, String dialogHeader) {
         Dialog<String> calenderDialog = new Dialog<>();
         calenderDialog.setTitle(dialogTitle);
-        calenderDialog.setHeaderText("Select Date of Birth");
+        calenderDialog.setHeaderText(dialogHeader);
         calenderDialog.setGraphic(null);
         applyStylesheet(calenderDialog.getDialogPane());
 
         DatePicker datePicker = new DatePicker();
+        datePicker.setShowWeekNumbers(false);
 
         // prefill if editing
-        if (prefillDob != null && !prefillDob.isEmpty()) {
-            try {
-                datePicker.setValue(java.time.LocalDate.parse(prefillDob));
-            } catch (Exception ignored) {}
-        }
+        if (prefillDob != null && !prefillDob.isEmpty()) datePicker.setValue(java.time.LocalDate.parse(prefillDob));
 
         calenderDialog.getDialogPane().setContent(datePicker);
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        calenderDialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        calenderDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
 
-        calenderDialog.setResultConverter(button -> {
-            if (button == okButton) return (datePicker.getValue() != null) ? datePicker.getValue().toString() : "";
-            return null;
-        });
+        calenderDialog.setResultConverter(button -> button == ok ? datePicker.getValue().toString() : "");
 
         return calenderDialog.showAndWait().orElse(null);
     }
@@ -351,7 +529,7 @@ public class HelloController {
     private String countyDialog(String prefillCounty, String dialogTitle) {
         Dialog<String> countyDialog = new Dialog<>();
         countyDialog.setTitle(dialogTitle);
-        countyDialog.setHeaderText("Select Home County");
+        countyDialog.setHeaderText("Select County");
         countyDialog.setGraphic(null);
         applyStylesheet(countyDialog.getDialogPane());
 
@@ -365,7 +543,6 @@ public class HelloController {
                 "Waterford", "Westmeath", "Wexford", "Wicklow"
         );
 
-        countyCombo.setEditable(false);
 
         // prefill if editing
         if (prefillCounty != null && !prefillCounty.isEmpty()) {
@@ -374,15 +551,141 @@ public class HelloController {
 
         countyDialog.getDialogPane().setContent(countyCombo);
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        countyDialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        countyDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
 
-        countyDialog.setResultConverter(button -> {
-            if (button == okButton) return countyCombo.getValue();
-            return null;
-        });
+        countyDialog.setResultConverter(button -> button == ok ? countyCombo.getValue() : null);
 
         return countyDialog.showAndWait().orElse(null);
+    }
+
+    @FXML
+    private String generalDialog(String prefill) {
+        Dialog<String> generalDialog = new Dialog<>();
+        generalDialog.setTitle("Select Constituency");
+        generalDialog.setHeaderText("Select General Election Constituency");
+        generalDialog.setGraphic(null);
+        applyStylesheet(generalDialog.getDialogPane());
+
+        ComboBox<String> constituencyCombo = new ComboBox<>();
+        constituencyCombo.getItems().addAll(
+                "Carlow–Kilkenny", "Cavan–Monaghan", "Clare", "Cork East",
+                "Cork North-Central", "Cork North-West", "Cork South-Central",
+                "Cork South-West", "Donegal", "Dublin Bay North",
+                "Dublin Bay South", "Dublin Central", "Dublin Fingal East", "Dublin Fingal West", "Dublin Mid-West",
+                "Dublin North-West", "Dublin Rathdown", "Dublin South-Central", "Dublin South-West",
+                "Dublin West", "Dún Laoghaire", "Galway East", "Galway West", "Kerry", "Kildare North",
+                "Kildare South", "Laois", "Limerick City", "Limerick County", "Longford–Westmeath",
+                "Louth", "Mayo", "Meath East", "Meath West", "Offaly", "Roscommon–Galway",
+                "Sligo–Leitrim", "Tipperary", "Waterford", "Wexford", "Wicklow"
+        );
+
+        if (prefill != null && !prefill.isEmpty()) {
+            constituencyCombo.setValue(prefill);
+        }
+
+        generalDialog.getDialogPane().setContent(constituencyCombo);
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        generalDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
+
+        generalDialog.setResultConverter(button -> button == ok ? constituencyCombo.getValue() : "");
+
+        return generalDialog.showAndWait().orElse(null);
+    }
+
+    @FXML
+    private String europeanDialog(String prefill) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Select European Constituency");
+        dialog.setHeaderText("Select European Constituency");
+        dialog.setGraphic(null);
+        applyStylesheet(dialog.getDialogPane());
+
+        ComboBox<String> euroCombo = new ComboBox<>();
+        euroCombo.getItems().addAll("Dublin", "South", "Midlands–North-West");
+
+        if (prefill != null && !prefill.isEmpty()) {
+            euroCombo.setValue(prefill);
+        }
+
+        dialog.getDialogPane().setContent(euroCombo);
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
+
+        dialog.setResultConverter(button -> button == ok ? euroCombo.getValue() : null);
+
+        return dialog.showAndWait().orElse(null);
+    }
+
+    @FXML
+    private String electionTypeDialog(String prefillElectionType, String dialogTitle) {
+        Dialog<String> electionTypeDialog = new Dialog<>();
+        electionTypeDialog.setTitle(dialogTitle);
+        electionTypeDialog.setHeaderText("Select Election Type");
+        electionTypeDialog.setGraphic(null);
+        applyStylesheet(electionTypeDialog.getDialogPane());
+
+        ComboBox<String> electionTypeCombo = new ComboBox<>();
+        electionTypeCombo.getItems().addAll("Local", "General", "European", "Presidential");
+        electionTypeCombo.setEditable(false);
+
+        if (prefillElectionType != null && !prefillElectionType.isEmpty()) {
+            electionTypeCombo.setValue(prefillElectionType);
+        }
+
+        electionTypeDialog.getDialogPane().setContent(electionTypeCombo);
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        electionTypeDialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
+
+        electionTypeDialog.setResultConverter(button -> button == ok ? electionTypeCombo.getValue() : null);
+
+        return electionTypeDialog.showAndWait().orElse(null);
+    }
+
+    @FXML
+    private String locationDialog(String prefillLocation, String dialogTitle, String electionType) {
+        Dialog<String> locationDialog = new Dialog<>();
+        locationDialog.setTitle(dialogTitle);
+        locationDialog.setHeaderText("Select Election Location");
+        locationDialog.setGraphic(null);
+        applyStylesheet(locationDialog.getDialogPane());
+
+        return switch (electionType) {
+            case "Local" -> countyDialog(prefillLocation, "Select County");
+            case "General" -> generalDialog(prefillLocation);
+            case "European" -> europeanDialog(prefillLocation);
+            case "Presidential" -> "Nationwide";
+            default -> "";
+        };
+
+    }
+
+    @FXML
+    private Integer numberDialog(Integer prefill, String dialogTitle, String headerText) {
+
+        Dialog<Integer> dialog = new Dialog<>();
+        dialog.setTitle(dialogTitle);
+        dialog.setHeaderText(headerText);
+        applyStylesheet(dialog.getDialogPane());
+
+        Spinner<Integer> spinner = new Spinner<>(1, 10, prefill != null ? prefill : 1);
+        spinner.setEditable(false);
+
+        dialog.getDialogPane().setContent(spinner);
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(ok, cancel);
+
+        dialog.setResultConverter(button -> button == ok ? spinner.getValue() : null);
+
+        return dialog.showAndWait().orElse(null);
     }
 }

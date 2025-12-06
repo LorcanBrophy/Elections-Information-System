@@ -20,44 +20,30 @@
 <?import javafx.scene.layout.Pane?>
 
 <TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.electionsinformationsystem.controllers.HelloController">
-    <Tab text="Main Menu" closable="false">
-        <VBox spacing="15">
-            <padding>
-                <Insets bottom="20" left="20" right="20" top="20"/>
-            </padding>
-
-            <HBox spacing="10">
-                <ComboBox fx:id="themePicker" onAction="#onChangeTheme" />
-            </HBox>
-        </VBox>
-    </Tab>
-
     <Tab text="Politicians" closable="false">
         <VBox spacing="15">
             <padding>
                 <Insets bottom="20" left="20" right="20" top="20"/>
             </padding>
+            <HBox spacing="10">
+                <ComboBox fx:id="themePicker" onAction="#onChangeTheme" />
+                <Pane HBox.hgrow="ALWAYS"/>
+                <TextField promptText= "Search for Politician" fx:id="politicianSearchResult"> </TextField>
+                <Button text="🔍" onAction="#onSearchPolitician"/>
+            </HBox>
 
             <HBox spacing="20" VBox.vgrow="ALWAYS">
                 <VBox spacing="10" HBox.hgrow="NEVER" VBox.vgrow="ALWAYS">
                     <Label text="Politicians"/>
+                    <ListView fx:id="politicianListView" VBox.vgrow="ALWAYS"/>
                     <HBox spacing="5">
                         <Button text="Add" onAction="#onAddPolitician"/>
                         <Button text="Edit" onAction="#onEditPolitician"/>
                         <Button text="Remove" onAction="#onRemovePolitician"/>
                     </HBox>
-                    <ListView fx:id="politicianListView" VBox.vgrow="ALWAYS"/>
                 </VBox>
 
                 <VBox spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-
-                    <HBox>
-                        <Pane HBox.hgrow="ALWAYS"/>
-                        <TextField promptText= "Search for Politician" fx:id="politicianSearchResult"> </TextField>
-                        <Button text="🔍" onAction="#onSearchPolitician"/>
-                    </HBox>
-
-
                     <Label text="Politician Details"/>
                     <TableView fx:id="politicianTableView" VBox.vgrow="NEVER">
                         <columns>
@@ -83,6 +69,41 @@
         </VBox>
     </Tab>
 
-    <Tab text="Elections" closable="false"> </Tab>
+    <Tab text="Elections" closable="false">
+        <VBox spacing="15">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20"/>
+            </padding>
+
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                <VBox spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                    <Label text="Elections"/>
+                    <HBox spacing="5">
+                        <Button text="Add" onAction="#onAddElection"/>
+                        <Button text="Edit" onAction="#onEditElection"/>
+                        <Button text="Remove" onAction="#onRemoveElection"/>
+                    </HBox>
+                    <ListView fx:id="electionListView" VBox.vgrow="ALWAYS"/>
+                </VBox>
+
+                <VBox spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                    <HBox spacing="10">
+                        <Pane HBox.hgrow="ALWAYS"/>
+                        <TextField promptText= "Search for Election" fx:id="electionSearchResult"> </TextField>
+                        <Button text="🔍" onAction="#onSearchPolitician"/>
+                    </HBox>
+
+                    <Label text="Candidates"/>
+                    <HBox spacing="5">
+                        <Button text="Add" onAction="#onAddCandidate"/>
+                        <Button text="Edit" onAction="#onEditCandidate"/>
+                        <Button text="Remove" onAction="#onRemoveCandidate"/>
+                    </HBox>
+                    <ListView fx:id="candidateListView" VBox.vgrow="ALWAYS"/>
+
+                </VBox>
+            </HBox>
+        </VBox>
+    </Tab>
 
 </TabPane>

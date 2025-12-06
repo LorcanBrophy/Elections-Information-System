@@ -68,11 +68,8 @@ public class Election {
     // toString
     @Override
     public String toString() {
-        return "Election {" +
-                "\n  Type: " + electionType +
-                "\n  Location: " + location +
-                "\n  Date: " + electionDate +
-                "\n  Number of Winners: " + numWinners +
-                "\n}";
+        if (electionType.equalsIgnoreCase("Presidential")) location = "Nationwide";
+
+        return electionType + " Election (" + location + ") - " + electionDate + " | Winners: " + numWinners;
     }
 }

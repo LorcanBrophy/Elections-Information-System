@@ -41,10 +41,8 @@ public class Candidate {
 
     @Override
     public String toString() {
-        return "Candidate {" +
-                "\n  Politician: " + politician.getPoliticianName() +
-                "\n  Party for Election: " + electionParty +
-                "\n  Votes: " + votes +
-                "\n}";
+        return "Candidate: " + politician.getPoliticianName()
+                + " | Party for Election: " + electionParty
+                + " | Votes: " + votes;
     }
 }

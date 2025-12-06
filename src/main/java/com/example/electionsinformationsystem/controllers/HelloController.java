@@ -9,6 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 
 import java.util.Objects;
+import java.util.SplittableRandom;
 
 public class HelloController {
 
@@ -39,9 +40,13 @@ public class HelloController {
     @FXML private ComboBox<String> themePicker;
 
     // election tab
-    @FXML public ListView<Election> electionListView;
-    @FXML public TextField electionSearchResult;
-    @FXML public ListView<Candidate> candidateListView;
+    @FXML private ListView<Election> electionListView;
+    @FXML private TextField electionSearchResult;
+    @FXML private ListView<Candidate> candidateListView;
+
+    @FXML private TableView<Candidate> candidateTableView;
+    @FXML private TableView<Politician> politicianDetailsTableView;
+
 
 
 
@@ -56,6 +61,9 @@ public class HelloController {
 
         politicianTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         politicianElectionTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+
+        candidateTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        politicianDetailsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
 
         politicianListView.setCellFactory(_ -> new ListCell<>() {
@@ -363,6 +371,17 @@ public class HelloController {
 
     @FXML
     public void onAddCandidate() {
+        Election selectedElection = electionListView.getSelectionModel().getSelectedItem();
+        if (selectedElection == null) return;
+
+        Candidate newCandidate = candidateDialog(null);
+        if (newCandidate == null) return;
+
+        selectedElection.addCandidate(newCandidate);
+        candidateListView.getItems().add(newCandidate);
+
+        System.out.println("Number of candidates: " + selectedElection.getCandidates().size());
+        System.out.println(selectedElection.getCandidates().display());
     }
 
     @FXML
@@ -405,42 +424,24 @@ public class HelloController {
 
         String dialogTitle = (existing != null) ? "Edit Politician" : "Add Politician";
 
-        // name dialog
-        TextInputDialog nameDialog = new TextInputDialog(prefillName);
-        nameDialog.setTitle(dialogTitle);
-        nameDialog.setHeaderText("Enter Politician Name");
-        nameDialog.setGraphic(null);
-        applyStylesheet(nameDialog.getDialogPane());
-
-        String politicianName = nameDialog.showAndWait().orElse("").trim();
+        // name
+        String politicianName = textInputDialog(prefillName, dialogTitle, "Enter Politician Name");
         if (politicianName.isEmpty()) return null;
 
         // date of birth
         String dateOfBirth = calenderDialog(prefillDob, dialogTitle, "Enter Date of Birth:");
         if (dateOfBirth == null || dateOfBirth.isEmpty()) return null;
 
-        // political party dialog
-        TextInputDialog politicalPartyDialog = new TextInputDialog(prefillPoliticalParty);
-        politicalPartyDialog.setTitle(dialogTitle);
-        politicalPartyDialog.setHeaderText("Enter Political Party");
-        politicalPartyDialog.setGraphic(null);
-        applyStylesheet(politicalPartyDialog.getDialogPane());
-
-        String politicalParty = politicalPartyDialog.showAndWait().orElse("").trim();
+        // political party
+        String politicalParty = textInputDialog(prefillPoliticalParty, dialogTitle, "Enter Political Party");
         if (politicalParty.isEmpty()) return null;
 
-        // home county dialog
+        // home county
         String homeCounty = countyDialog(prefillCounty, dialogTitle);
         if (homeCounty == null || homeCounty.isEmpty()) return null;
 
-        // photoUrl dialog
-        TextInputDialog photoUrlDialog = new TextInputDialog(prefillPhotoUrl);
-        photoUrlDialog.setTitle(dialogTitle);
-        photoUrlDialog.setHeaderText("Enter Photo URL");
-        photoUrlDialog.setGraphic(null);
-        applyStylesheet(photoUrlDialog.getDialogPane());
-
-        String photoUrl = photoUrlDialog.showAndWait().orElse("").trim();
+        // photo URL
+        String photoUrl = textInputDialog(prefillPhotoUrl, dialogTitle, "Enter Photo URL");
         if (photoUrl.isEmpty()) return null;
 
         // create new
@@ -489,6 +490,7 @@ public class HelloController {
             if (userInput == null) return null;
             numWinners = userInput;
         }
+
         if (existing == null) return new Election(electionType, location, electionDate, numWinners);
 
         existing.setElectionType(electionType);
@@ -497,6 +499,68 @@ public class HelloController {
         existing.setNumWinners(numWinners);
 
         return existing;
+    }
+
+    @FXML
+    private String textInputDialog(String prefill, String title, String header) {
+        TextInputDialog dialog = new TextInputDialog(prefill);
+        dialog.setTitle(title);
+        dialog.setHeaderText(header);
+        dialog.setGraphic(null);
+        applyStylesheet(dialog.getDialogPane());
+
+        return dialog.showAndWait().orElse("").trim();
+    }
+
+    @FXML
+    private Candidate candidateDialog(Candidate existing) {
+        // prefill values if editing
+        Politician prefillPolitician = existing != null ? existing.getPolitician() : null;
+        String prefillParty = existing != null ? existing.getElectionParty() : "";
+        int prefillVotes = existing != null ? existing.getVotes() : 0;
+
+        String dialogTitle = (existing != null) ? "Edit Candidate" : "Add Candidate";
+
+        // politician
+        Politician politician = politicianElectionDialog(prefillPolitician, dialogTitle);
+        if (politician == null) return null;
+
+        // party during election
+        String party = textInputDialog(prefillParty, dialogTitle, "Enter Party for this Election");
+        if (party.isEmpty()) return null;
+
+        // num votes
+        Integer numVotes = numberDialog(prefillVotes, dialogTitle, "Enter Number of Votes");
+        if (numVotes == null) return null;
+
+        if (existing == null) return new Candidate(politician, party, numVotes);
+
+        existing.setPolitician(politician);
+        existing.setElectionParty(party);
+        existing.setVotes(numVotes);
+
+        return existing;
+    }
+
+    @FXML
+    private Politician politicianElectionDialog(Politician prefillPolitician, String dialogTitle) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle(dialogTitle);
+        dialog.setHeaderText("Select Politician");
+        dialog.setGraphic(null);
+        applyStylesheet(dialog.getDialogPane());
+
+        ComboBox<String> politicianCombo = new ComboBox<>();
+        for (Politician politician : politicianLinkedList) {
+            politicianCombo.getItems().add(politician.getPoliticianName());
+        }
+
+        String prefillPolName = (prefillPolitician != null) ? prefillPolitician.getPoliticianName() : null;
+
+        String selected = showComboDialog(politicianCombo, dialog, prefillPolName);
+        if (selected == null || selected.isEmpty()) return null;
+
+        return nameHashTable.get(selected.toLowerCase().trim());
     }
 
     @FXML

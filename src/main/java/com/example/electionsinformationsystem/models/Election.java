@@ -3,12 +3,11 @@ package com.example.electionsinformationsystem.models;
 public class Election {
 
     // fields
-    public static final String[] ELECTION_TYPES = {"Local", "General", "European", "Presidential"};
     private String electionType;
-    private String location; // if local, show county list
+    private String location;
     private String electionDate;
     private int numWinners;
-    private final LinkedList<Candidate> candidates = new LinkedList<>();
+    private final LinkedList<Candidate> candidates = new LinkedList<>(); // stores each candidate in an election
 
     // constructor
     public Election(String electionType, String location, String electionDate, int numWinners) {

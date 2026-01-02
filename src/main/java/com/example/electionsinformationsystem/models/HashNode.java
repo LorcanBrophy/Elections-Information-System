@@ -1,10 +1,13 @@
 package com.example.electionsinformationsystem.models;
-
+// single node of hash table
 public class HashNode<K, V> {
+    // key used to find data
     K key;
-    V value;
-    HashNode<K, V> next;
 
+    // actual data being stored
+    V value;
+
+    // constructor
     public HashNode(K key, V value) {
         this.key = key;
         this.value = value;

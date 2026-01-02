@@ -1,10 +1,9 @@
 package com.example.electionsinformationsystem;
 
-import com.example.electionsinformationsystem.main.HelloApplication;
-import javafx.application.Application;
+import com.example.electionsinformationsystem.main.Application;
 
 public class Launcher {
     public static void main(String[] args) {
-        Application.launch(HelloApplication.class, args);
+        javafx.application.Application.launch(Application.class, args);
     }
 }

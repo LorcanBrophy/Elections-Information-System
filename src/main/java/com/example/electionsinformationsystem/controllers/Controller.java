@@ -9,9 +9,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 
 import java.util.Objects;
-import java.util.SplittableRandom;
 
-public class HelloController {
+public class Controller {
 
     // linked lists for iteration, display, etc.
     private final LinkedList<Politician> politicianLinkedList = new LinkedList<>();
@@ -46,6 +45,9 @@ public class HelloController {
 
     @FXML private TableView<Candidate> candidateTableView;
     @FXML private TableView<Politician> politicianDetailsTableView;
+
+    private String selectedSearchFilter = "All (Name, Party, County)";
+    private String selectedSortOption = "Name (A-Z)";
 
 
 
@@ -101,7 +103,30 @@ public class HelloController {
     // politician buttons
 
     @FXML
+    public void onSearchOptions() {
+        // filter dialog
+        String selectedFilter = filterDialog(selectedSearchFilter);
+        if (selectedFilter == null) return;
+
+        // sort dialog
+        String selectedSort = sortDialog(selectedSortOption);
+        if (selectedSort == null) return;
+
+        // save the selections
+        selectedSearchFilter = selectedFilter;
+        selectedSortOption = selectedSort;
+
+        // if (!politicianSearchResult.getText().trim().isEmpty()) {
+        //        onSearchPolitician();
+        //}
+    }
+
+    @FXML
     public void onSearchPolitician() {
+        // 1. uses fast hash lookups first for identical matches (fast)
+        // 2. next uses linked list iteration for partial matches (slow)
+        // 3. sorts matches
+
         String query = politicianSearchResult.getText().trim().toLowerCase();
 
         // clear old list view
@@ -113,50 +138,64 @@ public class HelloController {
             for (Politician p : politicianLinkedList) {
                 politicianListView.getItems().add(p);
             }
+
+            // TODO add sort
             return;
         }
+
+        LinkedList<Politician> matches = new LinkedList<>();
 
         // exact search : hash lookup
 
         // name
-        Politician exactMatchName = nameHashTable.get(query.toLowerCase());
-        if (exactMatchName != null) {
-            politicianListView.getItems().add(exactMatchName);
-            return;
+        if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("Name Only")) {
+            Politician nameMatch = nameHashTable.get(query.toLowerCase());
+            if (nameMatch != null) {
+                matches.add(nameMatch);
+            }
         }
 
         // party
-        LinkedList<Politician> partyMatchList = partyHashTable.get(query);
-        if (partyMatchList != null) {
-            for (Politician exactMatchParty : partyMatchList) {
-                politicianListView.getItems().add(exactMatchParty);
+        if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("Party Only")) {
+            LinkedList<Politician> partyMatchList = partyHashTable.get(query);
+            if (partyMatchList != null) {
+                for (Politician partyMatch : partyMatchList) {
+                    matches.add(partyMatch);
+                }
             }
-            return;
         }
 
         // county
-        LinkedList<Politician> countyMatchList = countyHashTable.get(query);
-        if (countyMatchList != null) {
-            for (Politician exactMatchCounty : countyMatchList) {
-                politicianListView.getItems().add(exactMatchCounty);
+        if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("County Only")) {
+            LinkedList<Politician> countyMatchList = countyHashTable.get(query);
+            if (countyMatchList != null) {
+                for (Politician countyMatch : countyMatchList) {
+                    matches.add(countyMatch);
+                }
             }
-            return;
         }
 
-
         // partial search : iterate through linked list
-        LinkedList<Politician> matches = new LinkedList<>();
 
         for (Politician partialMatch : politicianLinkedList) {
             boolean matchesName = partialMatch.getPoliticianName().toLowerCase().contains(query);
             boolean matchesParty = partialMatch.getPoliticalParty().toLowerCase().contains(query);
             boolean matchesCounty = partialMatch.getHomeCounty().toLowerCase().contains(query);
 
-            if (matchesName || matchesParty || matchesCounty) {
-                matches.add(partialMatch);
-            }
+            boolean shouldAdd = switch (selectedSearchFilter) {
+                case "All (Name, Party, County)" -> matchesName || matchesParty || matchesCounty;
+                case "Name Only" -> matchesName;
+                case "Party Only" -> matchesParty;
+                case "County Only" -> matchesCounty;
+                default -> false;
+            };
+
+            if (shouldAdd) matches.add(partialMatch);
         }
 
+        // TODO sort matches
+
+        // add to display
         for (Politician politician : matches) {
             politicianListView.getItems().add(politician);
         }
@@ -513,6 +552,27 @@ public class HelloController {
     }
 
     @FXML
+    private String showComboDialog(ComboBox<String> comboBox, Dialog<String> dialog, String prefill) {
+
+        if (prefill != null && !prefill.isEmpty()) {
+            comboBox.setValue(prefill);
+        }
+
+        dialog.getDialogPane().setContent(comboBox);
+
+        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().setAll(ok, cancel);
+
+        dialog.setResultConverter(button ->
+                button == ok ? comboBox.getValue() : null
+        );
+
+        return dialog.showAndWait().orElse(null);
+    }
+
+    @FXML
     private Candidate candidateDialog(Candidate existing) {
         // prefill values if editing
         Politician prefillPolitician = existing != null ? existing.getPolitician() : null;
@@ -648,27 +708,6 @@ public class HelloController {
     }
 
     @FXML
-    private String showComboDialog(ComboBox<String> comboBox, Dialog<String> dialog, String prefill) {
-
-        if (prefill != null && !prefill.isEmpty()) {
-            comboBox.setValue(prefill);
-        }
-
-        dialog.getDialogPane().setContent(comboBox);
-
-        ButtonType ok = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        dialog.getDialogPane().getButtonTypes().setAll(ok, cancel);
-
-        dialog.setResultConverter(button ->
-                button == ok ? comboBox.getValue() : null
-        );
-
-        return dialog.showAndWait().orElse(null);
-    }
-
-    @FXML
     private String electionTypeDialog(String prefillElectionType, String dialogTitle) {
         Dialog<String> electionTypeDialog = new Dialog<>();
         electionTypeDialog.setTitle(dialogTitle);
@@ -721,5 +760,45 @@ public class HelloController {
         dialog.setResultConverter(button -> button == ok ? spinner.getValue() : null);
 
         return dialog.showAndWait().orElse(null);
+    }
+
+    @FXML
+    private String filterDialog(String prefillFilter) {
+        Dialog<String> filterDialog = new Dialog<>();
+        filterDialog.setTitle("Search Filters");
+        filterDialog.setHeaderText("Select Filters for Search");
+        filterDialog.setGraphic(null);
+        applyStylesheet(filterDialog.getDialogPane());
+
+        ComboBox<String> filterCombo = new ComboBox<>();
+        filterCombo.getItems().addAll(
+                "All (Name, Party, County)",
+                "Name Only",
+                "Party Only",
+                "County Only"
+        );
+
+        return showComboDialog(filterCombo, filterDialog, prefillFilter);
+    }
+
+    @FXML
+    private String sortDialog(String prefillSort) {
+        Dialog<String> sortDialog = new Dialog<>();
+        sortDialog.setTitle("Sort Options");
+        sortDialog.setHeaderText("Select Sort Method");
+        sortDialog.setGraphic(null);
+        applyStylesheet(sortDialog.getDialogPane());
+
+        ComboBox<String> sortCombo = new ComboBox<>();
+        sortCombo.getItems().addAll(
+                "Name (A-Z)",
+                "Name (Z-A)",
+                "Party (A-Z)",
+                "County (A-Z)",
+                "Date of Birth (Oldest first)",
+                "Date of Birth (Youngest first)"
+        );
+
+        return showComboDialog(sortCombo, sortDialog, prefillSort);
     }
 }

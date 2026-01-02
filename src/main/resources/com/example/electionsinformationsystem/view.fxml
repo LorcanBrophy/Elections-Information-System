@@ -19,7 +19,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
 
-<TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.electionsinformationsystem.controllers.HelloController">
+<TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.electionsinformationsystem.controllers.Controller">
     <Tab text="Politicians" closable="false">
         <VBox spacing="15">
             <padding>
@@ -28,8 +28,13 @@
             <HBox spacing="10">
                 <ComboBox fx:id="themePicker" onAction="#onChangeTheme" />
                 <Pane HBox.hgrow="ALWAYS"/>
+
+
+
+
                 <TextField promptText= "Search for Politician" fx:id="politicianSearchResult"> </TextField>
                 <Button text="🔍" onAction="#onSearchPolitician"/>
+                <Button text="☰" onAction="#onSearchOptions"/>
             </HBox>
 
             <HBox spacing="20" VBox.vgrow="ALWAYS">

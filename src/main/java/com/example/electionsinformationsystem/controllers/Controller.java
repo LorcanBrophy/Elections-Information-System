@@ -98,7 +98,7 @@ public class Controller {
         applyStylesheet(scene.getRoot());
     }
 
-    // TODO NEED TO ADD FILTERING AND SORTING FOR SEARCH IDK
+    // TODO NEED TO ADD SORTING FOR SEARCH IDK
 
     // politician buttons
 
@@ -145,7 +145,7 @@ public class Controller {
 
         LinkedList<Politician> matches = new LinkedList<>();
 
-        // exact search : hash lookup
+        // 1. exact search : hash lookup
 
         // name
         if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("Name Only")) {
@@ -175,7 +175,7 @@ public class Controller {
             }
         }
 
-        // partial search : iterate through linked list
+        // 2. partial search : iterate through linked list
 
         for (Politician partialMatch : politicianLinkedList) {
             boolean matchesName = partialMatch.getPoliticianName().toLowerCase().contains(query);
@@ -193,12 +193,20 @@ public class Controller {
             if (shouldAdd) matches.add(partialMatch);
         }
 
+        // 3. sort matches
+
         // TODO sort matches
+        sortPoliticianSearch(matches, selectedSortOption);
 
         // add to display
         for (Politician politician : matches) {
             politicianListView.getItems().add(politician);
         }
+    }
+
+    @FXML
+    private void sortPoliticianSearch(LinkedList<Politician> matches, String selectedSortOption) {
+        //TODO MAKE SORT LOGIC
     }
 
     @FXML

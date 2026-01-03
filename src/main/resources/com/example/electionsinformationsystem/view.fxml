@@ -63,10 +63,10 @@
                     <Label text="Election Details"/>
                     <TableView fx:id="politicianElectionTableView" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="Election Type"/>
-                            <TableColumn text="Location"/>
-                            <TableColumn text="Date"/>
-                            <TableColumn text="Num Winners"/>
+                            <TableColumn text="Election Type" fx:id="electionTypeColumn"/>
+                            <TableColumn text="Location" fx:id="electionLocationColumn"/>
+                            <TableColumn text="Date" fx:id="electionDateColumn"/>
+                            <TableColumn text="Num Winners" fx:id="electionNumWinnersColumn"/>
                         </columns>
                     </TableView>
                 </VBox>

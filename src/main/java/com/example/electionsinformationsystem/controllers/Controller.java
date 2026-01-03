@@ -48,6 +48,11 @@ public class Controller {
     @FXML private ListView<Candidate> candidateListView;
 
     @FXML private TableView<Candidate> candidateTableView;
+    @FXML private TableColumn<Candidate, String> candidatePoliticianColumn;
+    @FXML private TableColumn<Candidate, String> candidatePartyColumn;
+    @FXML private TableColumn<Candidate, Integer> candidateVotesColumn;
+
+
     @FXML private TableView<Politician> politicianDetailsTableView;
 
     // search fields
@@ -57,18 +62,24 @@ public class Controller {
     @FXML
     public void initialize() {
 
-        // set up table columns to pull their values from Politician fields
+        // set up table columns
+        // politician details table on politician tab
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("politicianName"));
         dobColumn.setCellValueFactory(new PropertyValueFactory<>("dateOfBirth"));
         partyColumn.setCellValueFactory(new PropertyValueFactory<>("politicalParty"));
         countyColumn.setCellValueFactory(new PropertyValueFactory<>("homeCounty"));
         photoColumn.setCellValueFactory(new PropertyValueFactory<>("photoUrl"));
 
-
+        // election details table on politician tab
         electionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("electionType"));
         electionLocationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
         electionDateColumn.setCellValueFactory(new PropertyValueFactory<>("electionDate"));
         electionNumWinnersColumn.setCellValueFactory(new PropertyValueFactory<>("numWinners"));
+
+        // candidate details table on election tab
+        candidatePoliticianColumn.setCellValueFactory(new PropertyValueFactory<>("politician"));
+        candidatePartyColumn.setCellValueFactory(new PropertyValueFactory<>("electionParty"));
+        candidateVotesColumn.setCellValueFactory(new PropertyValueFactory<>("votes"));
 
         // allow columns to resize
         politicianTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
@@ -88,7 +99,16 @@ public class Controller {
 
         });
 
-        // listener to update TableView when a Politician is selected
+        candidateListView.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Candidate item, boolean empty) {
+                super.updateItem(item, empty);
+
+                setText((empty || item == null) ? null : item.getPolitician().getPoliticianName());
+            }
+        });
+
+        // listener to update table view when a politician is selected
         politicianListView.getSelectionModel().selectedItemProperty().addListener((_, _, newPolitician) -> {
 
             // clear previous politician details
@@ -112,6 +132,7 @@ public class Controller {
 
             // clear previous candidate data
             candidateListView.getItems().clear();
+            candidateTableView.getItems().clear();
 
             // if an election is selected, show only its candidates
             if (newElection != null) {
@@ -121,6 +142,19 @@ public class Controller {
             }
 
         });
+
+        // listener to show candidate details from selected candidate
+        candidateListView.getSelectionModel().selectedItemProperty().addListener((_, _, newCandidate) -> {
+
+            // clear previous candidate details
+            candidateTableView.getItems().clear();
+
+            // if a candidate is selected, show their details
+            if (newCandidate != null) {
+                candidateTableView.getItems().add(newCandidate);
+            }
+        });
+
 
 
         themePicker.getItems().addAll("Light Mode", "Dark Mode", "Cotton Candy");
@@ -508,7 +542,10 @@ public class Controller {
 
         // adds election to politicians record
         newCandidate.getPolitician().addElection(selectedElection);
-        politicianElectionTableView.refresh();
+
+        // refresh election table for currently selected politician
+        Politician selectedPolitician = politicianListView.getSelectionModel().getSelectedItem();
+        refreshPoliticianElectionTable(selectedPolitician);
 
         // debug
         System.out.println("Number of candidates: " + selectedElection.getCandidates().size());
@@ -531,6 +568,7 @@ public class Controller {
 
     @FXML
     public void onRemoveCandidate() {
+
         // get the currently selected candidate
         Candidate toRemove = candidateListView.getSelectionModel().getSelectedItem();
         if (toRemove == null) return;
@@ -539,14 +577,30 @@ public class Controller {
         Election selectedElection = electionListView.getSelectionModel().getSelectedItem();
         if (selectedElection == null) return;
 
-        // remove the candidate from the election linked list
+        // remove the candidate from the election
         selectedElection.getCandidates().remove(toRemove);
 
         // remove the election from the list view
         candidateListView.getItems().remove(toRemove);
 
+        // adds election to politicians record
+        toRemove.getPolitician().removeElection(selectedElection);
+
+        // refresh election table for currently selected politician
+        Politician selectedPolitician = politicianListView.getSelectionModel().getSelectedItem();
+        refreshPoliticianElectionTable(selectedPolitician);
+
         // debug
         System.out.println("Number of candidates: " + selectedElection.getCandidates().size());
+    }
+
+    private void refreshPoliticianElectionTable(Politician politician) {
+        politicianElectionTableView.getItems().clear();
+        if (politician == null) return;
+
+        for (Election e : politician.getElectionRecord()) {
+            politicianElectionTableView.getItems().add(e);
+        }
     }
 
     // HELPER METHODS
@@ -711,20 +765,33 @@ public class Controller {
         if (party.isEmpty()) return null;
 
         // num votes
-        String numVotesStr = textInputDialog(String.valueOf(prefillVotes), dialogTitle, "Enter Number of Votes");
-        if (numVotesStr.isEmpty()) return null;
+        Integer numVotes = null;
 
-        int numVotes;
+        // keeps asking till valid input/user cancelled dialog
+        while (numVotes == null) {
 
-        try {
-            numVotes = Integer.parseInt(numVotesStr);
-            if (numVotes < 0) return null;
-        } catch (NumberFormatException e) {
-            return null;
+            String numVotesStr = textInputDialog(String.valueOf(prefillVotes), dialogTitle, "Enter Number of Votes");
+            if (numVotesStr.isEmpty()) return null; // user cancelled dialog
+
+            try {
+                int parsedInt = Integer.parseInt(numVotesStr);
+                if (parsedInt < 0) throw new NumberFormatException();
+                numVotes = parsedInt;
+            } catch (NumberFormatException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Input");
+                alert.setHeaderText("Input must be Non-negative Integer");
+                alert.setContentText("Please enter a valid input: ");
+                alert.showAndWait();
+            }
+
+
         }
 
+        // if making new candidate, make new candidate
         if (existing == null) return new Candidate(politician, party, numVotes);
 
+        // else update existing candidate
         existing.setPolitician(politician);
         existing.setElectionParty(party);
         existing.setVotes(numVotes);
@@ -734,17 +801,23 @@ public class Controller {
 
     @FXML
     private Politician politicianElectionDialog(Politician prefillPolitician, String dialogTitle, Election election) {
+
+        // create dialog for selecting a politician
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle(dialogTitle);
         dialog.setHeaderText("Select Politician");
         dialog.setGraphic(null);
         applyStylesheet(dialog.getDialogPane());
 
+        // combo box to display available politicians
         ComboBox<String> politicianCombo = new ComboBox<>();
 
-        boolean alreadyCandidate = false;
+        // loop through all politicians
         for (Politician politician : politicianLinkedList) {
 
+            boolean alreadyCandidate = false;
+
+            // check if this politician is already a candidate in the selected election
             for (Candidate candidate : election.getCandidates()) {
                 if (candidate.getPolitician().getPoliticianName().equalsIgnoreCase(politician.getPoliticianName())) {
                     alreadyCandidate = true;
@@ -752,16 +825,21 @@ public class Controller {
                 }
             }
 
-            if (!alreadyCandidate) politicianCombo.getItems().add(politician.getPoliticianName());
+            // only add politician if they are NOT already a candidate
+            if (!alreadyCandidate) {
+                politicianCombo.getItems().add(politician.getPoliticianName());
+            }
         }
 
 
-
+        // prefill politician name if editing an existing candidate
         String prefillPolName = (prefillPolitician != null) ? prefillPolitician.getPoliticianName() : null;
 
+        // show dialog and get selected politician name
         String selected = showComboDialog(politicianCombo, dialog, prefillPolName);
         if (selected == null || selected.isEmpty()) return null;
 
+        // return politician from the hash table
         return nameHashTable.get(selected.toLowerCase().trim());
     }
 

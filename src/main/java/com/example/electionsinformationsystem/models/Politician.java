@@ -8,7 +8,7 @@ public class Politician {
     private String politicalParty; // should default to 'Independent' if empty, in dialog just make "if null, set Independant"
     private String homeCounty;
     private String photoUrl;
-    private LinkedList<Election> electionRecord;
+    private final LinkedList<Election> electionRecord = new LinkedList<>();
 
     // constructor
     public Politician(String politicianName, String dateOfBirth, String politicalParty, String homeCounty, String photoUrl) {
@@ -17,7 +17,6 @@ public class Politician {
         this.politicalParty = politicalParty;
         this.homeCounty = homeCounty;
         this.photoUrl = photoUrl;
-        this.electionRecord = new LinkedList<>();
     }
 
     // getters and setters
@@ -71,6 +70,17 @@ public class Politician {
         }
 
         if (!alreadyExists) electionRecord.add(election);
+    }
+
+    public void removeElection(Election election) {
+        if (electionRecord == null) return;
+
+        for (Election e : electionRecord) {
+            if (e.equals(election)) {
+                electionRecord.remove(e);
+                return;
+            }
+        }
     }
 
     @Override

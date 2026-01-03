@@ -109,9 +109,9 @@
                         <Label text="Candidate Details"/>
                         <TableView fx:id="candidateTableView" VBox.vgrow="ALWAYS" prefHeight="150">
                             <columns>
-                                <TableColumn text="Politician Name" fx:id="colPoliticianName"/>
-                                <TableColumn text="Party for Election" fx:id="colElectionParty"/>
-                                <TableColumn text="Votes" fx:id="colVotes"/>
+                                <TableColumn text="Name" fx:id="candidatePoliticianColumn"/>
+                                <TableColumn text="Party for Election" fx:id="candidatePartyColumn"/>
+                                <TableColumn text="Votes" fx:id="candidateVotesColumn"/>
                             </columns>
                         </TableView>
 

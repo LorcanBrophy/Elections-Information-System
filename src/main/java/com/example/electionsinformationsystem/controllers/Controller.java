@@ -1291,7 +1291,7 @@ public class Controller {
 
                 // rebuild name hash table
                 nameHashTable.put(p.getPoliticianName().toLowerCase(), p);
-                //.put(key, values from that key) we learning type shi
+                //.put(key, values from that key) we learning type shii
 
                 // rebuild party hash table
                 LinkedList<Politician> partyList = partyHashTable.get(p.getPoliticalParty().toLowerCase());

@@ -1271,7 +1271,7 @@ public class Controller {
         Object[] mainData = (Object[]) is.readObject();
         is.close();
 
-        // clears tables and linked lists in case of bomboclaat duplication type shi
+        // clears tables and linked lists in case of bomboclaat duplication type sh
         politicianLinkedList.clear();
         electionLinkedList.clear();
         nameHashTable.clear();

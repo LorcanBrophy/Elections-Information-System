@@ -39,6 +39,10 @@ public class Candidate {
         this.votes = votes;
     }
 
+    public String getPoliticianName() {
+        return politician.getPoliticianName();
+    }
+
     @Override
     public String toString() {
         return "Candidate: " + politician.getPoliticianName()

@@ -124,10 +124,10 @@
                         <Label text="Politician Details"/>
                         <TableView fx:id="politicianDetailsTableView" VBox.vgrow="ALWAYS" prefHeight="150">
                             <columns>
-                                <TableColumn text="DoB" fx:id="colDOB"/>
-                                <TableColumn text="Party" fx:id="colParty"/>
-                                <TableColumn text="County" fx:id="colCounty"/>
-                                <TableColumn text="Photo URL" fx:id="colPhoto"/>
+                                <TableColumn text="DoB" fx:id="dobColumn2"/>
+                                <TableColumn text="Party" fx:id="partyColumn2"/>
+                                <TableColumn text="County" fx:id="countyColumn2"/>
+                                <TableColumn text="Photo URL" fx:id="photoColumn2"/>
                             </columns>
                         </TableView>
 

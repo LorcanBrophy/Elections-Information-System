@@ -76,6 +76,14 @@ public class Controller {
 
     @FXML
     private TableView<Politician> politicianDetailsTableView;
+    @FXML
+    private TableColumn<Politician, String> dobColumn2;
+    @FXML
+    private TableColumn<Politician, String> partyColumn2;
+    @FXML
+    private TableColumn<Politician, String> countyColumn2;
+    @FXML
+    private TableColumn<Politician, String> photoColumn2;
 
     // search fields
     private String selectedSearchFilterPolitician = "All (Name, Party, County)";
@@ -102,9 +110,16 @@ public class Controller {
         electionNumWinnersColumn.setCellValueFactory(new PropertyValueFactory<>("numWinners"));
 
         // candidate details table on election tab
-        candidatePoliticianColumn.setCellValueFactory(new PropertyValueFactory<>("politician"));
+        candidatePoliticianColumn.setCellValueFactory(new PropertyValueFactory<>("politicianName"));
         candidatePartyColumn.setCellValueFactory(new PropertyValueFactory<>("electionParty"));
         candidateVotesColumn.setCellValueFactory(new PropertyValueFactory<>("votes"));
+
+        // politician details table on election tab
+        dobColumn2.setCellValueFactory(new PropertyValueFactory<>("dateOfBirth"));
+        partyColumn2.setCellValueFactory(new PropertyValueFactory<>("politicalParty"));
+        countyColumn2.setCellValueFactory(new PropertyValueFactory<>("homeCounty"));
+        photoColumn2.setCellValueFactory(new PropertyValueFactory<>("photoUrl"));
+
 
         // allow columns to resize
         politicianTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
@@ -173,10 +188,12 @@ public class Controller {
 
             // clear previous candidate details
             candidateTableView.getItems().clear();
+            politicianDetailsTableView.getItems().clear();
 
             // if a candidate is selected, show their details
             if (newCandidate != null) {
                 candidateTableView.getItems().add(newCandidate);
+                politicianDetailsTableView.getItems().add(newCandidate.getPolitician());
             }
         });
 

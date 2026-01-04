@@ -23,6 +23,7 @@ public class Politician {
     public String getPoliticianName() {
         return politicianName;
     }
+
     public void setPoliticianName(String politicianName) {
         this.politicianName = politicianName;
     }
@@ -30,6 +31,7 @@ public class Politician {
     public String getDateOfBirth() {
         return dateOfBirth;
     }
+
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
@@ -37,6 +39,7 @@ public class Politician {
     public String getPoliticalParty() {
         return politicalParty;
     }
+
     public void setPoliticalParty(String politicalParty) {
         this.politicalParty = politicalParty;
     }
@@ -44,6 +47,7 @@ public class Politician {
     public String getHomeCounty() {
         return homeCounty;
     }
+
     public void setHomeCounty(String homeCounty) {
         this.homeCounty = homeCounty;
     }
@@ -51,6 +55,7 @@ public class Politician {
     public String getPhotoUrl() {
         return photoUrl;
     }
+
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
     }

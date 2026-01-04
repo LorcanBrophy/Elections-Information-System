@@ -34,7 +34,7 @@
 
                 <TextField promptText= "Search for Politician" fx:id="politicianSearchResult"> </TextField>
                 <Button text="🔍" onAction="#onSearchPolitician"/>
-                <Button text="☰" onAction="#onSearchOptions"/>
+                <Button text="☰" onAction="#onSearchOptionsPolitician"/>
             </HBox>
 
             <HBox spacing="20" VBox.vgrow="ALWAYS">
@@ -95,6 +95,12 @@
 
                 <!-- Candidates VBox -->
                 <VBox spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                    <HBox spacing="10">
+                        <Pane HBox.hgrow="ALWAYS"/>
+                        <TextField promptText= "Search for Election" fx:id="electionSearchResult"> </TextField>
+                        <Button text="🔍" onAction="#onSearchElection"/>
+                        <Button text="☰" onAction="#onSearchOptionsElection"/>
+                    </HBox>
 
                     <Label text="Candidates"/>
                     <HBox spacing="5">
@@ -134,10 +140,3 @@
     </Tab>
 
 </TabPane>
-
-
-        <!--<HBox spacing="10">
-            <Pane HBox.hgrow="ALWAYS"/>
-            <TextField promptText= "Search for Election" fx:id="electionSearchResult"> </TextField>
-            <Button text="🔍" onAction="#onSearchPolitician"/>
-        </HBox>-->

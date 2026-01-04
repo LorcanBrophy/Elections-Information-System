@@ -10,6 +10,7 @@ import java.util.Objects;
 public class Application extends javafx.application.Application {
     @Override
     public void start(Stage stage) throws IOException {
+
         // load the fxml
         FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("/com/example/electionsinformationsystem/view.fxml"));
 

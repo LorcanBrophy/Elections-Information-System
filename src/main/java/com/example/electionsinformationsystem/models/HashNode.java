@@ -1,4 +1,5 @@
 package com.example.electionsinformationsystem.models;
+
 // single node of hash table
 public class HashNode<K, V> {
     // key used to find data

@@ -24,40 +24,65 @@ public class Controller {
     private final HashTableSC<String, LinkedList<Election>> electionDateHashTable = new HashTableSC<>(20);
 
     // politician tab
-    @FXML private TextField politicianSearchResult;
-    @FXML private ListView<Politician> politicianListView;
+    @FXML
+    private TextField politicianSearchResult;
+    @FXML
+    private ListView<Politician> politicianListView;
 
-    @FXML private TableView<Politician> politicianTableView;
-    @FXML private TableColumn<Politician, String> nameColumn;
-    @FXML private TableColumn<Politician, String> dobColumn;
-    @FXML private TableColumn<Politician, String> partyColumn;
-    @FXML private TableColumn<Politician, String> countyColumn;
-    @FXML private TableColumn<Politician, String> photoColumn;
+    @FXML
+    private TableView<Politician> politicianTableView;
+    @FXML
+    private TableColumn<Politician, String> nameColumn;
+    @FXML
+    private TableColumn<Politician, String> dobColumn;
+    @FXML
+    private TableColumn<Politician, String> partyColumn;
+    @FXML
+    private TableColumn<Politician, String> countyColumn;
+    @FXML
+    private TableColumn<Politician, String> photoColumn;
 
-    @FXML private TableView<Election> politicianElectionTableView;
-    @FXML private TableColumn<Election, String> electionTypeColumn;
-    @FXML private TableColumn<Election, String> electionLocationColumn;
-    @FXML private TableColumn<Election, String> electionDateColumn;
-    @FXML private TableColumn<Election, Integer> electionNumWinnersColumn;
+    @FXML
+    private TableView<Election> politicianElectionTableView;
+    @FXML
+    private TableColumn<Election, String> electionTypeColumn;
+    @FXML
+    private TableColumn<Election, String> electionLocationColumn;
+    @FXML
+    private TableColumn<Election, String> electionDateColumn;
+    @FXML
+    private TableColumn<Election, Integer> electionNumWinnersColumn;
 
-    @FXML private ComboBox<String> themePicker;
+    @FXML
+    private ComboBox<String> themePicker;
 
     // election tab
-    @FXML private ListView<Election> electionListView;
-    @FXML private TextField electionSearchResult;
-    @FXML private ListView<Candidate> candidateListView;
+    @FXML
+    private ListView<Election> electionListView;
+    @FXML
+    private TextField electionSearchResult;
+    @FXML
+    private ListView<Candidate> candidateListView;
 
-    @FXML private TableView<Candidate> candidateTableView;
-    @FXML private TableColumn<Candidate, String> candidatePoliticianColumn;
-    @FXML private TableColumn<Candidate, String> candidatePartyColumn;
-    @FXML private TableColumn<Candidate, Integer> candidateVotesColumn;
+    @FXML
+    private TableView<Candidate> candidateTableView;
+    @FXML
+    private TableColumn<Candidate, String> candidatePoliticianColumn;
+    @FXML
+    private TableColumn<Candidate, String> candidatePartyColumn;
+    @FXML
+    private TableColumn<Candidate, Integer> candidateVotesColumn;
 
 
-    @FXML private TableView<Politician> politicianDetailsTableView;
+    @FXML
+    private TableView<Politician> politicianDetailsTableView;
 
     // search fields
-    private String selectedSearchFilter = "All (Name, Party, County)";
-    private String selectedSortOption = "Name (A-Z)";
+    private String selectedSearchFilterPolitician = "All (Name, Party, County)";
+    private final String selectedSortOptionPolitician = "Name (A-Z)";
+
+    private String selectedSearchFilterElection = "All (Type, Date)";
+    private String selectedSortOptionElection = "Type (A-Z)";
 
     @FXML
     public void initialize() {
@@ -156,7 +181,6 @@ public class Controller {
         });
 
 
-
         themePicker.getItems().addAll("Light Mode", "Dark Mode", "Cotton Candy");
         themePicker.getSelectionModel().selectFirst();
     }
@@ -174,40 +198,36 @@ public class Controller {
     // politician buttons
 
     @FXML
-    public void onSearchOptions() {
+    public void onSearchOptionsPolitician() {
         // filter dialog
-        String selectedFilter = filterDialog(selectedSearchFilter);
+        String selectedFilter = politicianFilterDialog(selectedSearchFilterPolitician);
         if (selectedFilter == null) return;
 
         // sort dialog
-        String selectedSort = sortDialog(selectedSortOption);
+        String selectedSort = politicianSortDialog(selectedSortOptionPolitician);
         if (selectedSort == null) return;
 
         // save the selections
-        selectedSearchFilter = selectedFilter;
-        selectedSortOption = selectedSort;
-
-        // if (!politicianSearchResult.getText().trim().isEmpty()) {
-        //        onSearchPolitician();
-        //}
+        selectedSearchFilterPolitician = selectedFilter;
+        selectedSortOptionElection = selectedSort;
     }
-
+    
     @FXML
     public void onSearchPolitician() {
         // 1. uses fast hash lookups first for identical matches (fast)
         // 2. next uses linked list iteration for partial matches (slow)
         // 3. sorts matches
 
-        String query = politicianSearchResult.getText().trim().toLowerCase();
-
         // clear old list view
         politicianListView.getItems().clear();
-
+        
+        
+        String query = politicianSearchResult.getText().trim().toLowerCase();
 
         // if search bar is empty, add all back to list
         if (query.isEmpty()) {
-            for (Politician p : politicianLinkedList) {
-                politicianListView.getItems().add(p);
+            for (Politician politician : politicianLinkedList) {
+                politicianListView.getItems().add(politician);
             }
 
             // TODO add sort
@@ -219,29 +239,27 @@ public class Controller {
         // 1. exact search : hash lookup
 
         // name
-        if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("Name Only")) {
-            Politician nameMatch = nameHashTable.get(query.toLowerCase());
-            if (nameMatch != null) {
-                matches.add(nameMatch);
-            }
+        if (selectedSearchFilterPolitician.equals("All (Name, Party, County)") || selectedSearchFilterPolitician.equals("Name Only")) {
+            Politician nameMatch = nameHashTable.get(query);
+            if (nameMatch != null && notAlreadyAdded(matches, nameMatch)) matches.add(nameMatch);
         }
 
         // party
-        if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("Party Only")) {
+        if (selectedSearchFilterPolitician.equals("All (Name, Party, County)") || selectedSearchFilterPolitician.equals("Party Only")) {
             LinkedList<Politician> partyMatchList = partyHashTable.get(query);
             if (partyMatchList != null) {
                 for (Politician partyMatch : partyMatchList) {
-                    matches.add(partyMatch);
+                    if (notAlreadyAdded(matches, partyMatch)) matches.add(partyMatch);
                 }
             }
         }
 
         // county
-        if (selectedSearchFilter.equals("All (Name, Party, County)") || selectedSearchFilter.equals("County Only")) {
+        if (selectedSearchFilterPolitician.equals("All (Name, Party, County)") || selectedSearchFilterPolitician.equals("County Only")) {
             LinkedList<Politician> countyMatchList = countyHashTable.get(query);
             if (countyMatchList != null) {
                 for (Politician countyMatch : countyMatchList) {
-                    matches.add(countyMatch);
+                    if (notAlreadyAdded(matches, countyMatch)) matches.add(countyMatch);
                 }
             }
         }
@@ -253,7 +271,7 @@ public class Controller {
             boolean matchesParty = partialMatch.getPoliticalParty().toLowerCase().contains(query);
             boolean matchesCounty = partialMatch.getHomeCounty().toLowerCase().contains(query);
 
-            boolean shouldAdd = switch (selectedSearchFilter) {
+            boolean shouldAdd = switch (selectedSearchFilterPolitician) {
                 case "All (Name, Party, County)" -> matchesName || matchesParty || matchesCounty;
                 case "Name Only" -> matchesName;
                 case "Party Only" -> matchesParty;
@@ -261,13 +279,13 @@ public class Controller {
                 default -> false;
             };
 
-            if (shouldAdd) matches.add(partialMatch);
+            if (shouldAdd && notAlreadyAdded(matches, partialMatch)) matches.add(partialMatch);
         }
 
         // 3. sort matches
 
         // TODO sort matches
-        sortPoliticianSearch(matches, selectedSortOption);
+        sortPoliticianSearch(matches, selectedSortOptionPolitician);
 
         // add to display
         for (Politician politician : matches) {
@@ -388,7 +406,99 @@ public class Controller {
     // election buttons
 
     @FXML
+    public void onSearchOptionsElection() {
+        // filter dialog
+        String selectedFilter = electionFilterDialog(selectedSearchFilterElection);
+        if (selectedFilter == null) return;
+
+        // sort dialog
+        String selectedSort = electionSortDialog(selectedSortOptionElection);
+        if (selectedSort == null) return;
+
+        // save the choices
+        selectedSearchFilterElection = selectedFilter;
+        selectedSortOptionElection = selectedSort;
+    }
+
+    @FXML
     public void onSearchElection() {
+        // 1. uses fast hash lookups first for identical matches (fast)
+        // 2. next uses linked list iteration for partial matches (slow)
+        // 3. sorts matches
+
+        // clear old list view
+        electionListView.getItems().clear();
+
+        String query = electionSearchResult.getText().trim().toLowerCase();
+
+        // if search bar is empty, add all back to list
+        if (query.isEmpty()) {
+            for (Election election : electionLinkedList) {
+                electionListView.getItems().add(election);
+            }
+
+            // TODO add sort
+            return;
+        }
+        
+        LinkedList<Election> matches = new LinkedList<>();
+
+        // 1. exact search : hash lookup
+        
+        // type
+        if (selectedSearchFilterElection.equals("All (Type, Date)") || selectedSearchFilterElection.equals("Election Type Only")) {
+            LinkedList<Election> typeMatchList = electionTypeHashTable.get(query);
+
+            if (typeMatchList != null) {
+                for (Election typeMatch : typeMatchList) {
+                    if (notAlreadyAdded(matches, typeMatch)) matches.add(typeMatch);
+                }
+            }
+        }
+
+        // Date
+        if (selectedSearchFilterElection.equals("All (Type, Date)") || selectedSearchFilterElection.equals("Date of Election Only")) {
+            LinkedList<Election> dateMatchList = electionDateHashTable.get(query);
+
+            if (dateMatchList != null) {
+                for (Election dateMatch : dateMatchList) {
+                    if (notAlreadyAdded(matches, dateMatch)) matches.add(dateMatch);
+                }
+            }
+        }
+
+        // 2. partial search : iterate through linked list
+
+        for (Election partialMatch : electionLinkedList) {
+            boolean matchesType = partialMatch.getElectionType().toLowerCase().contains(query);
+            boolean matchesDate = partialMatch.getElectionDate().toLowerCase().contains(query);
+
+            boolean shouldAdd = switch (selectedSearchFilterElection) {
+                case "All (Type, Date)" -> matchesType || matchesDate;
+                case "Election Type Only" -> matchesType;
+                case "Date of Election Only" -> matchesDate;
+                default -> false;
+            };
+
+            if (shouldAdd && notAlreadyAdded(matches, partialMatch)) matches.add(partialMatch);
+        }
+
+        // 3. sort matches
+
+        // TODO sort matches
+        sortElectionSearch(matches, selectedSortOptionElection);
+
+        // add to display
+        for (Election election : matches) {
+            electionListView.getItems().add(election);
+        }
+        
+        
+    }
+
+    @FXML
+    private void sortElectionSearch(LinkedList<Election> matches, String selectedSortOption) {
+        //TODO MAKE SORT LOGIC
     }
 
     @FXML
@@ -594,6 +704,7 @@ public class Controller {
         System.out.println("Number of candidates: " + selectedElection.getCandidates().size());
     }
 
+    @FXML
     private void refreshPoliticianElectionTable(Politician politician) {
         politicianElectionTableView.getItems().clear();
         if (politician == null) return;
@@ -695,9 +806,7 @@ public class Controller {
         if (electionType.equalsIgnoreCase("Presidential")) {
             numWinners = 1;
         } else {
-            Integer userInput = numberDialog(
-                    prefillNumWinners > 0 ? prefillNumWinners : 1, dialogTitle, "Enter Number of Winners:"
-            );
+            Integer userInput = numberDialog(prefillNumWinners > 0 ? prefillNumWinners : 1, dialogTitle);
             if (userInput == null) return null;
             numWinners = userInput;
         }
@@ -757,7 +866,7 @@ public class Controller {
         if (election == null) return null;
 
         // politician
-        Politician politician = politicianElectionDialog(prefillPolitician, dialogTitle, election  );
+        Politician politician = politicianElectionDialog(prefillPolitician, dialogTitle, election);
         if (politician == null) return null;
 
         // party during election
@@ -868,6 +977,7 @@ public class Controller {
         return calenderDialog.showAndWait().orElse(null);
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     @FXML
     private String countyDialog(String prefillCounty, String dialogTitle) {
         Dialog<String> countyDialog = new Dialog<>();
@@ -878,17 +988,17 @@ public class Controller {
 
         ComboBox<String> countyCombo = new ComboBox<>();
         countyCombo.getItems().addAll(
-                "Antrim", "Armagh", "Carlow", "Cavan", "Clare", "Cork", "Derry",
-                "Donegal", "Down", "Dublin", "Fermanagh", "Galway", "Kerry",
-                "Kildare", "Kilkenny", "Laois", "Leitrim", "Limerick",
-                "Longford", "Louth", "Mayo", "Meath", "Monaghan",
-                "Offaly", "Roscommon", "Sligo", "Tipperary", "Tyrone",
-                "Waterford", "Westmeath", "Wexford", "Wicklow"
+                "Carlow", "Cavan", "Clare", "Cork", "Donegal", "Dublin",
+                "Galway", "Kerry", "Kildare", "Kilkenny", "Laois", "Leitrim",
+                "Limerick", "Longford", "Louth", "Mayo", "Meath", "Monaghan",
+                "Offaly", "Roscommon", "Sligo", "Tipperary", "Waterford",
+                "Westmeath", "Wexford", "Wicklow"
         );
 
         return showComboDialog(countyCombo, countyDialog, prefillCounty);
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     @FXML
     private String generalDialog(String prefill) {
         Dialog<String> generalDialog = new Dialog<>();
@@ -961,14 +1071,14 @@ public class Controller {
     }
 
     @FXML
-    private Integer numberDialog(Integer prefill, String dialogTitle, String headerText) {
+    private Integer numberDialog(Integer prefill, String dialogTitle) {
 
         Dialog<Integer> dialog = new Dialog<>();
         dialog.setTitle(dialogTitle);
-        dialog.setHeaderText(headerText);
+        dialog.setHeaderText("Enter Number of Winners:");
         applyStylesheet(dialog.getDialogPane());
 
-        Spinner<Integer> spinner = new Spinner<>(1, 10, prefill != null ? prefill : 1);
+        Spinner<Integer> spinner = new Spinner<>(1, 100, prefill != null ? prefill : 1);
         spinner.setEditable(false);
 
         dialog.getDialogPane().setContent(spinner);
@@ -983,13 +1093,13 @@ public class Controller {
     }
 
     @FXML
-    private String filterDialog(String prefillFilter) {
+    private String politicianFilterDialog(String prefillFilter) {
+        //searchFilterSortDialog(prefillFilter, "Search Filters","Select Filters for Search")
         Dialog<String> filterDialog = new Dialog<>();
         filterDialog.setTitle("Search Filters");
         filterDialog.setHeaderText("Select Filters for Search");
         filterDialog.setGraphic(null);
         applyStylesheet(filterDialog.getDialogPane());
-
         ComboBox<String> filterCombo = new ComboBox<>();
         filterCombo.getItems().addAll(
                 "All (Name, Party, County)",
@@ -1002,7 +1112,7 @@ public class Controller {
     }
 
     @FXML
-    private String sortDialog(String prefillSort) {
+    private String politicianSortDialog(String prefillSort) {
         Dialog<String> sortDialog = new Dialog<>();
         sortDialog.setTitle("Sort Options");
         sortDialog.setHeaderText("Select Sort Method");
@@ -1021,4 +1131,62 @@ public class Controller {
 
         return showComboDialog(sortCombo, sortDialog, prefillSort);
     }
+
+    @FXML
+    private String electionFilterDialog(String prefillFilter) {
+        Dialog<String> filterDialog = new Dialog<>();
+        filterDialog.setTitle("Search Filters");
+        filterDialog.setHeaderText("Select Filters for Search");
+        filterDialog.setGraphic(null);
+        applyStylesheet(filterDialog.getDialogPane());
+
+        ComboBox<String> filterCombo = new ComboBox<>();
+        filterCombo.getItems().addAll(
+                "All (Type, Date)",
+                "Election Type Only",
+                "Date of Election Only"
+        );
+
+        return showComboDialog(filterCombo, filterDialog, prefillFilter);
+    }
+
+    @FXML
+    private String electionSortDialog(String prefillSort) {
+        Dialog<String> sortDialog = new Dialog<>();
+        sortDialog.setTitle("Sort Options");
+        sortDialog.setHeaderText("Select Sort Method");
+        sortDialog.setGraphic(null);
+        applyStylesheet(sortDialog.getDialogPane());
+
+        ComboBox<String> sortCombo = new ComboBox<>();
+        sortCombo.getItems().addAll(
+                "Type (A-Z)",
+                "Type (Z-A)",
+                "Date (Oldest first)",
+                "Date (Newest first)"
+        );
+
+        return showComboDialog(sortCombo, sortDialog, prefillSort);
+    }
+
+   /* @FXML
+    private String searchFilterSortDialog(String prefill, String title, String header) {
+        Dialog<String> filterDialog = new Dialog<>();
+        filterDialog.setTitle(title);
+        filterDialog.setHeaderText(header);
+        filterDialog.setGraphic(null);
+        applyStylesheet(filterDialog.getDialogPane());
+    }*/
+
+
+    private <T> boolean notAlreadyAdded(LinkedList<T> list, T item) {
+        for (T existing : list) {
+            if (existing == item) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }

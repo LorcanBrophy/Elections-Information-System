@@ -1,6 +1,7 @@
 package com.example.electionsinformationsystem.models;
 
 public class LLNode<T> {
+
     // fields
     private final T data; // the data stored in this node
     public LLNode<T> next; // reference to next node

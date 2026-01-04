@@ -1,0 +1,22 @@
+<object-stream>
+  <object-array>
+    <com.example.electionsinformationsystem.models.LinkedList>
+      <head>
+        <data class="com.example.electionsinformationsystem.models.Politician">
+          <politicianName>hello</politicianName>
+          <dateOfBirth>2025-12-29</dateOfBirth>
+          <politicalParty>fine gael</politicalParty>
+          <homeCounty>Cavan</homeCounty>
+          <photoUrl>ass</photoUrl>
+          <electionRecord>
+            <size>0</size>
+          </electionRecord>
+        </data>
+      </head>
+      <size>1</size>
+    </com.example.electionsinformationsystem.models.LinkedList>
+    <com.example.electionsinformationsystem.models.LinkedList>
+      <size>0</size>
+    </com.example.electionsinformationsystem.models.LinkedList>
+  </object-array>
+</object-stream>

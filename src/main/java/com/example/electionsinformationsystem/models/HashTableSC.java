@@ -91,4 +91,10 @@ public class HashTableSC<K, V> {
             }
         }
     }
+    // clears the hash table
+    public void clear() {
+        for (LinkedList<HashNode<K, V>> bucket : hashTable) {
+            bucket.clear();
+        }
+    }
 }

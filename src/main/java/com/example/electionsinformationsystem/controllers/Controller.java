@@ -6,7 +6,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import java.util.Objects;
 
@@ -85,6 +91,27 @@ public class Controller {
     @FXML
     private TableColumn<Politician, String> photoColumn2;
 
+    @FXML
+    private void onSaveButton() {
+        try {
+            save();
+            refreshAllListViews();
+            System.out.println("Data saved");
+        } catch (Exception e) {
+            System.out.println("Load failed");
+        }
+    }
+    @FXML
+    private void onLoadButton() {
+        try {
+            load();
+            refreshAllListViews(); // important to update the GUI after loading
+            System.out.println("Data loaded!");
+        } catch (Exception e) {
+            System.out.println("Load failed");
+        }
+    }
+
     // search fields
     private String selectedSearchFilterPolitician = "All (Name, Party, County)";
     private final String selectedSortOptionPolitician = "Name (A-Z)";
@@ -119,7 +146,6 @@ public class Controller {
         partyColumn2.setCellValueFactory(new PropertyValueFactory<>("politicalParty"));
         countyColumn2.setCellValueFactory(new PropertyValueFactory<>("homeCounty"));
         photoColumn2.setCellValueFactory(new PropertyValueFactory<>("photoUrl"));
-
 
         // allow columns to resize
         politicianTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
@@ -1195,7 +1221,6 @@ public class Controller {
         applyStylesheet(filterDialog.getDialogPane());
     }*/
 
-
     private <T> boolean notAlreadyAdded(LinkedList<T> list, T item) {
         for (T existing : list) {
             if (existing == item) {
@@ -1205,5 +1230,108 @@ public class Controller {
         return true;
     }
 
+    // after loading, the politician/election will show up on listview
+    private void refreshAllListViews() {
+        politicianListView.getItems().clear();
+        electionListView.getItems().clear();
 
+        for (Politician p : politicianLinkedList) {
+            politicianListView.getItems().add(p);
+        }
+
+        for (Election e : electionLinkedList) {
+            electionListView.getItems().add(e);
+        }
+    }
+
+    // SAVING AND LOADING
+    public void save() throws Exception {
+        XStream xstream = new XStream(new DomDriver());
+        ObjectOutputStream os = xstream.createObjectOutputStream(new FileWriter("elections.xml"));
+        Object[] mainData = new Object[]{politicianLinkedList, electionLinkedList};
+        os.writeObject(mainData);
+        os.close();
+    }
+
+    public void load() throws Exception {
+        Class<?>[] classes = new Class[] {
+                Politician.class,
+                Election.class,
+                Candidate.class,
+                HashTableSC.class,
+                HashNode.class,
+                LinkedList.class,
+                LLNode.class
+        };
+
+        XStream xstream = new XStream(new DomDriver());
+        XStream.setupDefaultSecurity(xstream);
+        xstream.allowTypes(classes);
+        ObjectInputStream is = xstream.createObjectInputStream(new FileReader("elections.xml"));
+        Object[] mainData = (Object[]) is.readObject();
+        is.close();
+
+        // clears tables and linked lists in case of bomboclaat duplication type shi
+        politicianLinkedList.clear();
+        electionLinkedList.clear();
+        nameHashTable.clear();
+        partyHashTable.clear();
+        countyHashTable.clear();
+        electionTypeHashTable.clear();
+        electionDateHashTable.clear();
+
+        // restore lists
+        LinkedList<Politician> loadedPoliticians = (LinkedList<Politician>) mainData[0];
+        LinkedList<Election> loadedElections = (LinkedList<Election>) mainData[1];
+
+        // REBUILDING POLITICIAN HASH TABLES
+        if (loadedPoliticians != null) {
+            for (Politician p : loadedPoliticians) {
+                politicianLinkedList.add(p);
+
+                // rebuild name hash table
+                nameHashTable.put(p.getPoliticianName().toLowerCase(), p);
+                //.put(key, values from that key) we learning type shi
+
+                // rebuild party hash table
+                LinkedList<Politician> partyList = partyHashTable.get(p.getPoliticalParty().toLowerCase());
+                if (partyList == null) {
+                    partyList = new LinkedList<>();
+                    partyHashTable.put(p.getPoliticalParty().toLowerCase(), partyList);
+                }
+                partyList.add(p);
+
+                // rebuild county hash table
+                LinkedList<Politician> countyList = countyHashTable.get(p.getHomeCounty().toLowerCase());
+                if (countyList == null) {
+                    countyList = new LinkedList<>();
+                    countyHashTable.put(p.getHomeCounty().toLowerCase(), countyList);
+                }
+                countyList.add(p);
+            }
+        }
+
+        // REBUILDING ELECTION HASH TABLESS
+        if (loadedElections != null) {
+            for (Election e : loadedElections) {
+                electionLinkedList.add(e);
+
+                // rebuild type hash table
+                LinkedList<Election> typeList = electionTypeHashTable.get(e.getElectionType().toLowerCase());
+                if (typeList == null) {
+                    typeList = new LinkedList<>();
+                    electionTypeHashTable.put(e.getElectionType().toLowerCase(), typeList);
+                }
+                typeList.add(e);
+
+                // rebuild date hash table
+                LinkedList<Election> dateList = electionDateHashTable.get(e.getElectionDate().toLowerCase());
+                if (dateList == null) {
+                    dateList = new LinkedList<>();
+                    electionDateHashTable.put(e.getElectionDate().toLowerCase(), dateList);
+                }
+                dateList.add(e);
+            }
+        }
+    }
 }

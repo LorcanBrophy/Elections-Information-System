@@ -73,6 +73,19 @@ public class LinkedList<T> implements Iterable<T> {
         return str.toString();
     }
 
+    // converts LL to an array for sorting
+    public Object[] toArray() {
+        Object[] arr = new Object[size];
+
+        int i = 0;
+        for (LLNode<T> current = head; current != null; current = current.next) {
+            arr[i++] = current.getData();
+        }
+        return arr;
+    }
+
+
+
     @Override
     public java.util.Iterator<T> iterator() {
         // allows for each loops

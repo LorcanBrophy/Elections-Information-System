@@ -7,7 +7,6 @@ public class HashTableSC<K, V> {
     private final int numBuckets;
 
     // sets up hash table
-    @SuppressWarnings("unchecked")
     public HashTableSC(int size) {
         this.numBuckets = size;
 

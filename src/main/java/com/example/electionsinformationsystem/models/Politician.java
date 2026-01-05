@@ -5,7 +5,7 @@ public class Politician {
     // fields
     private String politicianName;
     private String dateOfBirth;
-    private String politicalParty; // should default to 'Independent' if empty, in dialog just make "if null, set Independant"
+    private String politicalParty; // should default to 'Independent' if empty, in dialog just make "if null, set Independent"
     private String homeCounty;
     private String photoUrl;
     private final LinkedList<Election> electionRecord = new LinkedList<>();
@@ -78,14 +78,7 @@ public class Politician {
     }
 
     public void removeElection(Election election) {
-        if (electionRecord == null) return;
-
-        for (Election e : electionRecord) {
-            if (e.equals(election)) {
-                electionRecord.remove(e);
-                return;
-            }
-        }
+        electionRecord.remove(election);
     }
 
     @Override

@@ -79,7 +79,6 @@ public class Controller {
     @FXML
     private TableColumn<Candidate, Integer> candidateVotesColumn;
 
-
     @FXML
     private TableView<Politician> politicianDetailsTableView;
     @FXML
@@ -101,6 +100,7 @@ public class Controller {
             System.out.println("Load failed");
         }
     }
+
     @FXML
     private void onLoadButton() {
         try {
@@ -252,7 +252,6 @@ public class Controller {
         applyStylesheet(scene.getRoot());
     }
 
-    // TODO NEED TO ADD SORTING FOR SEARCH IDK
 
     // politician buttons
 
@@ -269,8 +268,10 @@ public class Controller {
         // save the selections
         selectedSearchFilterPolitician = selectedFilter;
         selectedSortOptionPolitician = selectedSort;
+
+        sortPoliticians();
     }
-    
+
     @FXML
     public void onSearchPolitician() {
         // 1. uses fast hash lookups first for identical matches (fast)
@@ -279,8 +280,8 @@ public class Controller {
 
         // clear old list view
         politicianListView.getItems().clear();
-        
-        
+
+
         String query = politicianSearchResult.getText().trim().toLowerCase();
 
         // if search bar is empty, add all back to list
@@ -300,12 +301,14 @@ public class Controller {
         // name
         if (selectedSearchFilterPolitician.equals("All (Name, Party, County)") || selectedSearchFilterPolitician.equals("Name Only")) {
             Politician nameMatch = nameHashTable.get(query);
+
             if (nameMatch != null && notAlreadyAdded(matches, nameMatch)) matches.add(nameMatch);
         }
 
         // party
         if (selectedSearchFilterPolitician.equals("All (Name, Party, County)") || selectedSearchFilterPolitician.equals("Party Only")) {
             LinkedList<Politician> partyMatchList = partyHashTable.get(query);
+
             if (partyMatchList != null) {
                 for (Politician partyMatch : partyMatchList) {
                     if (notAlreadyAdded(matches, partyMatch)) matches.add(partyMatch);
@@ -316,6 +319,7 @@ public class Controller {
         // county
         if (selectedSearchFilterPolitician.equals("All (Name, Party, County)") || selectedSearchFilterPolitician.equals("County Only")) {
             LinkedList<Politician> countyMatchList = countyHashTable.get(query);
+
             if (countyMatchList != null) {
                 for (Politician countyMatch : countyMatchList) {
                     if (notAlreadyAdded(matches, countyMatch)) matches.add(countyMatch);
@@ -356,7 +360,7 @@ public class Controller {
 
         addPoliticianToDataStructures(newPolitician);
 
-        politicianListView.getItems().add(newPolitician);
+        sortPoliticians();
 
         System.out.println("Number of politicians: " + politicianLinkedList.size());
         System.out.println(politicianLinkedList.display());
@@ -413,7 +417,7 @@ public class Controller {
             newCountyList.add(edited);
         }
 
-        politicianListView.refresh();
+        sortPoliticians();
 
         System.out.println("Number of politicians: " + politicianLinkedList.size());
         System.out.println(politicianLinkedList.display());
@@ -424,6 +428,7 @@ public class Controller {
         Politician selected = politicianListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
+        // remove from hash tables
         nameHashTable.remove(selected.getPoliticianName().toLowerCase());
 
         LinkedList<Politician> partyList = partyHashTable.get(selected.getPoliticalParty().toLowerCase());
@@ -432,172 +437,13 @@ public class Controller {
         LinkedList<Politician> countyList = countyHashTable.get(selected.getHomeCounty().toLowerCase());
         if (countyList != null) countyList.remove(selected);
 
+        // remove from linked list
         politicianLinkedList.remove(selected);
         politicianListView.getItems().remove(selected);
 
         System.out.println("Number of politicians: " + politicianLinkedList.size());
         System.out.println(politicianLinkedList.display());
     }
-
-    public static void mergeSortPoliticiansByNameAtoZ(Politician[] politicians) {
-        int length = politicians.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Politician[] left = new Politician[mid];
-
-
-
-
-
-        //bomboclaat
-
-
-
-
-
-
-
-
-
-        Politician[] right = new Politician[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = politicians[i];
-        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
-
-        mergeSortPoliticiansByNameAtoZ(left);
-        mergeSortPoliticiansByNameAtoZ(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            if (left[li].getPoliticianName()
-                    .compareToIgnoreCase(right[ri].getPoliticianName()) <= 0) {
-                politicians[i++] = left[li++];
-            } else {
-                politicians[i++] = right[ri++];
-            }
-        }
-
-        while (li < left.length) politicians[i++] = left[li++];
-        while (ri < right.length) politicians[i++] = right[ri++];
-    }
-
-    public static void mergeSortPoliticiansByNameZtoA(Politician[] politicians) {
-        int length = politicians.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Politician[] left = new Politician[mid];
-        Politician[] right = new Politician[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = politicians[i];
-        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
-
-        mergeSortPoliticiansByNameZtoA(left);
-        mergeSortPoliticiansByNameZtoA(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            if (left[li].getPoliticianName()
-                    .compareToIgnoreCase(right[ri].getPoliticianName()) >= 0) {
-                politicians[i++] = left[li++];
-            } else {
-                politicians[i++] = right[ri++];
-            }
-        }
-        while (li < left.length) politicians[i++] = left[li++];
-        while (ri < right.length) politicians[i++] = right[ri++];
-    }
-
-    // COUNTY SORTING
-    public static void mergeSortByCountyAtoZ(Politician[] politicians) {
-        int length = politicians.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Politician[] left = new Politician[mid];
-        Politician[] right = new Politician[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = politicians[i];
-        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
-
-        mergeSortByCountyAtoZ(left);
-        mergeSortByCountyAtoZ(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            politicians[i++] = (left[li].getHomeCounty().compareToIgnoreCase(right[ri].getHomeCounty()) <= 0)
-                    ? left[li++] : right[ri++];
-        }
-        while (li < left.length) politicians[i++] = left[li++];
-        while (ri < right.length) politicians[i++] = right[ri++];
-    }
-
-    public static void mergeSortByCountyZtoA(Politician[] politicians) {
-        int length = politicians.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Politician[] left = new Politician[mid];
-        Politician[] right = new Politician[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = politicians[i];
-        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
-
-        mergeSortByCountyZtoA(left);
-        mergeSortByCountyZtoA(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            politicians[i++] = (left[li].getHomeCounty().compareToIgnoreCase(right[ri].getHomeCounty()) >= 0)
-                    ? left[li++] : right[ri++];
-        }
-        while (li < left.length) politicians[i++] = left[li++];
-        while (ri < right.length) politicians[i++] = right[ri++];
-    }
-
-
-    //PARTY SORTING
-    public static void mergeSortByPartyAtoZ(Politician[] politicians) {
-        int length = politicians.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Politician[] left = new Politician[mid];
-        Politician[] right = new Politician[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = politicians[i];
-        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
-
-        mergeSortByPartyAtoZ(left);
-        mergeSortByPartyAtoZ(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            politicians[i++] = (left[li].getPoliticalParty().compareToIgnoreCase(right[ri].getPoliticalParty()) <= 0)
-                    ? left[li++] : right[ri++];
-        }
-        while (li < left.length) politicians[i++] = left[li++];
-        while (ri < right.length) politicians[i++] = right[ri++];
-    }
-
-    public static void mergeSortByPartyZtoA(Politician[] politicians) {
-        int length = politicians.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Politician[] left = new Politician[mid];
-        Politician[] right = new Politician[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = politicians[i];
-        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
-
-        mergeSortByPartyZtoA(left);
-        mergeSortByPartyZtoA(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            politicians[i++] = (left[li].getPoliticalParty().compareToIgnoreCase(right[ri].getPoliticalParty()) >= 0)
-                    ? left[li++] : right[ri++];
-        }
-        while (li < left.length) politicians[i++] = left[li++];
-        while (ri < right.length) politicians[i++] = right[ri++];
-    }
-
 
     // election buttons
 
@@ -614,6 +460,8 @@ public class Controller {
         // save the choices
         selectedSearchFilterElection = selectedFilter;
         selectedSortOptionElection = selectedSort;
+
+        sortElections();
     }
 
     @FXML
@@ -636,11 +484,11 @@ public class Controller {
             // TODO add sort
             return;
         }
-        
+
         LinkedList<Election> matches = new LinkedList<>();
 
         // 1. exact search : hash lookup
-        
+
         // type
         if (selectedSearchFilterElection.equals("All (Type, Date)") || selectedSearchFilterElection.equals("Election Type Only")) {
             LinkedList<Election> typeMatchList = electionTypeHashTable.get(query);
@@ -685,8 +533,6 @@ public class Controller {
         for (Election election : matches) {
             electionListView.getItems().add(election);
         }
-        
-        
     }
 
     @FXML
@@ -697,8 +543,7 @@ public class Controller {
 
         addElectionToDataStructures(newElection);
 
-        // add the new election to the list view
-        electionListView.getItems().add(newElection);
+        sortElections();
 
         // debug
         System.out.println("Number of elections: " + electionLinkedList.size());
@@ -760,8 +605,7 @@ public class Controller {
             newElectionDateList.add(edited);
         }
 
-        // refresh list view to show changes
-        electionListView.refresh();
+        sortElections();
 
         // debug
         System.out.println("Number of elections: " + electionLinkedList.size());
@@ -792,62 +636,6 @@ public class Controller {
         System.out.println("Number of elections: " + electionLinkedList.size());
         System.out.println(electionLinkedList.display());
     }
-
-    // DATE AND TYPE SORTING
-    public static void mergeSortElectionsByDate(Election[] elections) {
-        int length = elections.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Election[] left = new Election[mid];
-
-        Election[] right = new Election[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = elections[i];
-        for (int i = mid; i < length; i++) right[i - mid] = elections[i];
-
-        mergeSortElectionsByDate(left);
-        mergeSortElectionsByDate(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            if (left[li].getElectionDate()
-                    .compareTo(right[ri].getElectionDate()) <= 0) {
-                elections[i++] = left[li++];
-            } else {
-                elections[i++] = right[ri++];
-            }
-        }
-        while (li < left.length) elections[i++] = left[li++];
-        while (ri < right.length) elections[i++] = right[ri++];
-    }
-
-    public static void mergeSortElectionsByType(Election[] elections) {
-        int length = elections.length;
-        if (length <= 1) return;
-        int mid = length / 2;
-        Election[] left = new Election[mid];
-        Election[] right = new Election[length - mid];
-
-        for (int i = 0; i < mid; i++) left[i] = elections[i];
-        for (int i = mid; i < length; i++) right[i - mid] = elections[i];
-
-        mergeSortElectionsByType(left);
-        mergeSortElectionsByType(right);
-
-        int i = 0, li = 0, ri = 0;
-        while (li < left.length && ri < right.length) {
-            if (left[li].getElectionType()
-                    .compareToIgnoreCase(right[ri].getElectionType()) <= 0) {
-                elections[i++] = left[li++];
-            } else {
-                elections[i++] = right[ri++];
-            }
-        }
-        while (li < left.length) elections[i++] = left[li++];
-        while (ri < right.length) elections[i++] = right[ri++];
-    }
-
-
 
     // candidate buttons
 
@@ -924,6 +712,269 @@ public class Controller {
     }
 
     @FXML
+    private void refreshPoliticianElectionTable(Politician politician) {
+        politicianElectionTableView.getItems().clear();
+        if (politician == null) return;
+
+        for (Election e : politician.getElectionRecord()) {
+            politicianElectionTableView.getItems().add(e);
+        }
+    }
+
+
+    // SORTING METHODS
+
+    @FXML
+    private void sortPoliticians() {
+        if (selectedSortOptionPolitician.isEmpty()) return;
+
+        // convert linked list to array
+        Object[] temp = politicianLinkedList.toArray();
+        Politician[] politicians = new Politician[temp.length];
+        for (int i = 0; i < temp.length; i++) {
+            politicians[i] = (Politician) temp[i];
+        }
+
+        // choose which merge sort to apply based on the selection
+        switch (selectedSortOptionPolitician) {
+            case "Name (A-Z)":
+                mergeSortByName(politicians, true);
+                break;
+            case "Name (Z-A)":
+                mergeSortByName(politicians, false);
+                break;
+            case "Party (A-Z)":
+                mergeSortByParty(politicians, true);
+                break;
+            case "Party (Z-A)":
+                mergeSortByParty(politicians, false);
+                break;
+            case "County (A-Z)":
+                mergeSortByCounty(politicians, true);
+                break;
+            case "County (Z-A)":
+                mergeSortByCounty(politicians, false);
+                break;
+            case "Date of Birth (Oldest first)":
+                mergeSortByDOB(politicians, true);
+                break;
+            case "Date of Birth (Youngest first)":
+                mergeSortByDOB(politicians, false);
+                break;
+            default:
+                break;
+        }
+
+        // update the list view
+        politicianListView.getItems().clear();
+        politicianListView.getItems().addAll(politicians);
+    }
+
+    // name sorting
+    public static void mergeSortByName(Politician[] politicians, boolean AtoZ) {
+        int length = politicians.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Politician[] left = new Politician[mid];
+        Politician[] right = new Politician[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = politicians[i];
+        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
+
+        mergeSortByName(left, AtoZ);
+        mergeSortByName(right, AtoZ);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            int comparison = left[li].getPoliticianName().compareToIgnoreCase(right[ri].getPoliticianName());
+            if (!AtoZ) comparison = -comparison;
+
+            politicians[i++] = (comparison <= 0) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) politicians[i++] = left[li++];
+        while (ri < right.length) politicians[i++] = right[ri++];
+    }
+
+    // party sorting
+    public static void mergeSortByParty(Politician[] politicians, boolean AtoZ) {
+        int length = politicians.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Politician[] left = new Politician[mid];
+        Politician[] right = new Politician[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = politicians[i];
+        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
+
+        mergeSortByParty(left, AtoZ);
+        mergeSortByParty(right, AtoZ);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            int comparison = left[li].getPoliticalParty().compareToIgnoreCase(right[ri].getPoliticalParty());
+            if (!AtoZ) comparison = -comparison;
+
+            politicians[i++] = (comparison <= 0) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) politicians[i++] = left[li++];
+        while (ri < right.length) politicians[i++] = right[ri++];
+    }
+
+    // county sorting
+    public static void mergeSortByCounty(Politician[] politicians, boolean AtoZ) {
+        int length = politicians.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Politician[] left = new Politician[mid];
+        Politician[] right = new Politician[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = politicians[i];
+        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
+
+        mergeSortByCounty(left, AtoZ);
+        mergeSortByCounty(right, AtoZ);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            int comparison = left[li].getHomeCounty().compareToIgnoreCase(right[ri].getHomeCounty());
+            if (!AtoZ) comparison = -comparison;
+
+            politicians[i++] = (comparison <= 0) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) politicians[i++] = left[li++];
+        while (ri < right.length) politicians[i++] = right[ri++];
+    }
+
+    // dob sorting
+    public static void mergeSortByDOB(Politician[] politicians, boolean oldestFirst) {
+        int length = politicians.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Politician[] left = new Politician[mid];
+        Politician[] right = new Politician[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = politicians[i];
+        for (int i = mid; i < length; i++) right[i - mid] = politicians[i];
+
+        mergeSortByDOB(left, oldestFirst);
+        mergeSortByDOB(right, oldestFirst);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            int comparison = left[li].getDateOfBirth().compareTo(right[ri].getDateOfBirth());
+            if (!oldestFirst) comparison = -comparison;
+
+            politicians[i++] = (comparison <= 0) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) politicians[i++] = left[li++];
+        while (ri < right.length) politicians[i++] = right[ri++];
+    }
+
+
+    @FXML
+    private void sortElections() {
+        if (selectedSortOptionElection.isEmpty()) return;
+
+        // convert linked list to array
+        Object[] temp = electionLinkedList.toArray();
+        Election[] elections = new Election[temp.length];
+        for (int i = 0; i < temp.length; i++) {
+            elections[i] = (Election) temp[i];
+        }
+
+        // choose which merge sort to apply based on the selection
+        switch (selectedSortOptionElection) {
+            case "Type (A-Z)":
+                mergeSortByType(elections, true);
+                break;
+            case "Type (Z-A)":
+                mergeSortByType(elections, false);
+                break;
+            case "Date (Oldest)":
+                mergeSortByDate(elections, true);
+                break;
+            case "Date (Newest)":
+                mergeSortByDate(elections, false);
+                break;
+            default:
+                break;
+        }
+
+        // update the list view
+        electionListView.getItems().clear();
+        electionListView.getItems().addAll(elections);
+    }
+
+    // type sorting
+    public static void mergeSortByType(Election[] elections, boolean AtoZ) {
+        int length = elections.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Election[] left = new Election[mid];
+        Election[] right = new Election[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = elections[i];
+        for (int i = mid; i < length; i++) right[i - mid] = elections[i];
+
+        mergeSortByType(left, AtoZ);
+        mergeSortByType(right, AtoZ);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            int comparison = left[li].getElectionType().compareToIgnoreCase(right[ri].getElectionType());
+            if (!AtoZ) comparison = -comparison;
+
+            elections[i++] = (comparison <= 0) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) elections[i++] = left[li++];
+        while (ri < right.length) elections[i++] = right[ri++];
+    }
+
+    // date sorting
+    public static void mergeSortByDate(Election[] elections, boolean oldestFirst) {
+        int length = elections.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Election[] left = new Election[mid];
+        Election[] right = new Election[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = elections[i];
+        for (int i = mid; i < length; i++) right[i - mid] = elections[i];
+
+        mergeSortByDate(left, oldestFirst);
+        mergeSortByDate(right, oldestFirst);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            int comparison = left[li].getElectionDate().compareTo(right[ri].getElectionDate());
+            if (!oldestFirst) comparison = -comparison;
+
+            elections[i++] = (comparison <= 0) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) elections[i++] = left[li++];
+        while (ri < right.length) elections[i++] = right[ri++];
+    }
+
+
+    @FXML
     private void sortCandidates(Election election) {
 
         // get the linked list of candidates from this election
@@ -944,6 +995,7 @@ public class Controller {
         candidateListView.getItems().addAll(candidates);
     }
 
+    // vote sorting
     public static void mergeSortByVotes(Candidate[] candidates) {
         int length = candidates.length;
         if (length <= 1) return;
@@ -970,15 +1022,6 @@ public class Controller {
 
     }
 
-    @FXML
-    private void refreshPoliticianElectionTable(Politician politician) {
-        politicianElectionTableView.getItems().clear();
-        if (politician == null) return;
-
-        for (Election e : politician.getElectionRecord()) {
-            politicianElectionTableView.getItems().add(e);
-        }
-    }
 
     // HELPER METHODS
 
@@ -1358,6 +1401,7 @@ public class Controller {
         return dialog.showAndWait().orElse(null);
     }
 
+    @FXML
     private String showSelectionDialog(String title, String header, String prefill, String... options) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle(title);
@@ -1393,7 +1437,9 @@ public class Controller {
                 "Name (A-Z)",
                 "Name (Z-A)",
                 "Party (A-Z)",
+                "Party (Z-A)",
                 "County (A-Z)",
+                "County (Z-A)",
                 "Date of Birth (Oldest first)",
                 "Date of Birth (Youngest first)"
         );
@@ -1419,8 +1465,8 @@ public class Controller {
                 prefillSort,
                 "Type (A-Z)",
                 "Type (Z-A)",
-                "Date (Oldest first)",
-                "Date (Newest first)"
+                "Date (Oldest)",
+                "Date (Newest)"
         );
     }
 
@@ -1525,7 +1571,7 @@ public class Controller {
     }
 
     public void load() throws Exception {
-        Class<?>[] classes = new Class[] {
+        Class<?>[] classes = new Class[]{
                 Politician.class,
                 Election.class,
                 Candidate.class,
@@ -1542,7 +1588,7 @@ public class Controller {
         Object[] mainData = (Object[]) in.readObject();
         in.close();
 
-        // clears tables and linked lists in case of bomboclaat duplication type sh
+        // clears tables and linked lists in case of duplication
         politicianLinkedList.clear();
         electionLinkedList.clear();
         nameHashTable.clear();

@@ -40,6 +40,7 @@ public class Candidate {
     }
 
     // used for table view
+    @SuppressWarnings("unused")
     public String getPoliticianName() {
         return politician.getPoliticianName();
     }

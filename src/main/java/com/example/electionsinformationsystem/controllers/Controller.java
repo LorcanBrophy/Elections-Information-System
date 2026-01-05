@@ -167,10 +167,25 @@ public class Controller {
 
         candidateListView.setCellFactory(_ -> new ListCell<>() {
             @Override
-            protected void updateItem(Candidate item, boolean empty) {
-                super.updateItem(item, empty);
+            protected void updateItem(Candidate candidate, boolean empty) {
+                super.updateItem(candidate, empty);
 
-                setText((empty || item == null) ? null : item.getPolitician().getPoliticianName());
+                // setText((empty || candidate == null) ? null : candidate.getPolitician().getPoliticianName());
+
+                if (empty || candidate == null) {
+                    setText(null);
+                    getStyleClass().remove("top-candidate"); // remove style for empty cells
+                } else {
+                    // show candidate name and votes
+                    setText(candidate.getPolitician().getPoliticianName() + " - " + candidate.getVotes() + " votes");
+
+                    // highlight the top candidate
+                    if (getIndex() == 0) {
+                        getStyleClass().add("top-candidate");
+                    } else {
+                        getStyleClass().removeAll("top-candidate");
+                    }
+                }
             }
         });
 
@@ -200,11 +215,9 @@ public class Controller {
             candidateListView.getItems().clear();
             candidateTableView.getItems().clear();
 
-            // if an election is selected, show only its candidates
+            // if an election is selected, sort and show its candidates
             if (newElection != null) {
-                for (Candidate candidate : newElection.getCandidates()) {
-                    candidateListView.getItems().add(candidate);
-                }
+                sortCandidates(newElection);
             }
 
         });
@@ -635,6 +648,7 @@ public class Controller {
 
         // add candidate to list view
         candidateListView.getItems().add(newCandidate);
+        sortCandidates(selectedElection);
 
         // adds election to politicians record
         newCandidate.getPolitician().addElection(selectedElection);
@@ -688,6 +702,53 @@ public class Controller {
 
         // debug
         System.out.println("Number of candidates: " + selectedElection.getCandidates().size());
+    }
+
+    @FXML
+    private void sortCandidates(Election election) {
+
+        // get the linked list of candidates from this election
+        LinkedList<Candidate> candidateLinkedList = election.getCandidates();
+
+        // convert linked list to array
+        Object[] temp = candidateLinkedList.toArray();
+        Candidate[] candidates = new Candidate[temp.length];
+        for (int i = 0; i < temp.length; i++) {
+            candidates[i] = (Candidate) temp[i];
+        }
+
+        // sort by votes descending
+        mergeSortByVotes(candidates);
+
+        // update the list view
+        candidateListView.getItems().clear();
+        candidateListView.getItems().addAll(candidates);
+    }
+
+    public static void mergeSortByVotes(Candidate[] candidates) {
+        int length = candidates.length;
+        if (length <= 1) return;
+
+        int mid = length / 2;
+
+        Candidate[] left = new Candidate[mid];
+        Candidate[] right = new Candidate[length - mid];
+
+        for (int i = 0; i < mid; i++) left[i] = candidates[i];
+        for (int i = mid; i < length; i++) right[i - mid] = candidates[i];
+
+        mergeSortByVotes(left);
+        mergeSortByVotes(right);
+
+        int i = 0, li = 0, ri = 0;
+        while (li < left.length && ri < right.length) {
+            candidates[i++] = (left[li].getVotes() >= right[ri].getVotes()) ? left[li++] : right[ri++];
+        }
+
+        while (li < left.length) candidates[i++] = left[li++];
+        while (ri < right.length) candidates[i++] = right[ri++];
+
+
     }
 
     @FXML

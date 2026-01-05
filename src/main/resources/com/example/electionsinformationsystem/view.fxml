@@ -31,14 +31,6 @@
                 <TextField promptText= "Search for Politician" fx:id="politicianSearchResult"> </TextField>
                 <Button text="🔍" onAction="#onSearchPolitician"/>
                 <Button text="☰" onAction="#onSearchOptionsPolitician"/>
-
-
-                <HBox spacing="10">
-                    <Button text="Save" onAction="#onSaveButton"/>
-                    <Button text="Load" onAction="#onLoadButton"/>
-                </HBox>
-
-
             </HBox>
 
             <HBox spacing="20" VBox.vgrow="ALWAYS">
@@ -73,6 +65,12 @@
                             <TableColumn text="Num Winners" fx:id="electionNumWinnersColumn"/>
                         </columns>
                     </TableView>
+
+                    <HBox spacing="10">
+                        <Pane HBox.hgrow="ALWAYS"/>
+                        <Button text="Save" onAction="#onSaveButton"/>
+                        <Button text="Load" onAction="#onLoadButton"/>
+                    </HBox>
                 </VBox>
             </HBox>
         </VBox>

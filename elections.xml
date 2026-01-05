@@ -3,20 +3,137 @@
     <com.example.electionsinformationsystem.models.LinkedList>
       <head>
         <data class="com.example.electionsinformationsystem.models.Politician">
-          <politicianName>hello</politicianName>
-          <dateOfBirth>2025-12-29</dateOfBirth>
-          <politicalParty>fine gael</politicalParty>
-          <homeCounty>Cavan</homeCounty>
-          <photoUrl>ass</photoUrl>
+          <politicianName>Donald Trump</politicianName>
+          <dateOfBirth>1955-01-13</dateOfBirth>
+          <politicalParty>Republicans</politicalParty>
+          <homeCounty>Waterford</homeCounty>
+          <photoUrl>trump.png</photoUrl>
           <electionRecord>
-            <size>0</size>
+            <head>
+              <data class="com.example.electionsinformationsystem.models.Election">
+                <electionType>Presidential</electionType>
+                <location>Nationwide</location>
+                <electionDate>2026-01-01</electionDate>
+                <numWinners>1</numWinners>
+                <candidates>
+                  <head>
+                    <data class="com.example.electionsinformationsystem.models.Candidate">
+                      <politician>
+                        <politicianName>Catherine Connolly</politicianName>
+                        <dateOfBirth>2025-01-16</dateOfBirth>
+                        <politicalParty>Independent</politicalParty>
+                        <homeCounty>Roscommon</homeCounty>
+                        <photoUrl>catherine.png</photoUrl>
+                        <electionRecord>
+                          <head>
+                            <data class="com.example.electionsinformationsystem.models.Election" reference="../../../../../../.."/>
+                          </head>
+                          <size>1</size>
+                        </electionRecord>
+                      </politician>
+                      <electionParty>Independent</electionParty>
+                      <votes>100000</votes>
+                    </data>
+                    <next>
+                      <data class="com.example.electionsinformationsystem.models.Candidate">
+                        <politician reference="../../../../../../../.."/>
+                        <electionParty>Democrats</electionParty>
+                        <votes>100</votes>
+                      </data>
+                      <next>
+                        <data class="com.example.electionsinformationsystem.models.Candidate">
+                          <politician>
+                            <politicianName>Gavin Newsom</politicianName>
+                            <dateOfBirth>2013-01-10</dateOfBirth>
+                            <politicalParty>Democrats</politicalParty>
+                            <homeCounty>Sligo</homeCounty>
+                            <photoUrl>biden.png</photoUrl>
+                            <electionRecord>
+                              <head>
+                                <data class="com.example.electionsinformationsystem.models.Election" reference="../../../../../../../../.."/>
+                                <next>
+                                  <data class="com.example.electionsinformationsystem.models.Election">
+                                    <electionType>General</electionType>
+                                    <location>Dún Laoghaire</location>
+                                    <electionDate>2027-01-01</electionDate>
+                                    <numWinners>25</numWinners>
+                                    <candidates>
+                                      <head>
+                                        <data class="com.example.electionsinformationsystem.models.Candidate">
+                                          <politician reference="../../../../../../../../../../../../../../../../.."/>
+                                          <electionParty>Independent</electionParty>
+                                          <votes>102</votes>
+                                        </data>
+                                        <next>
+                                          <data class="com.example.electionsinformationsystem.models.Candidate">
+                                            <politician reference="../../../../../../../../.."/>
+                                            <electionParty>Labour Party</electionParty>
+                                            <votes>12345</votes>
+                                          </data>
+                                        </next>
+                                      </head>
+                                      <size>2</size>
+                                    </candidates>
+                                  </data>
+                                  <next>
+                                    <data class="com.example.electionsinformationsystem.models.Election">
+                                      <electionType>Local</electionType>
+                                      <location>Mayo</location>
+                                      <electionDate>2004-01-08</electionDate>
+                                      <numWinners>4</numWinners>
+                                      <candidates>
+                                        <head>
+                                          <data class="com.example.electionsinformationsystem.models.Candidate">
+                                            <politician reference="../../../../../../../../.."/>
+                                            <electionParty>Sinn Fein</electionParty>
+                                            <votes>333</votes>
+                                          </data>
+                                        </head>
+                                        <size>1</size>
+                                      </candidates>
+                                    </data>
+                                  </next>
+                                </next>
+                              </head>
+                              <size>3</size>
+                            </electionRecord>
+                          </politician>
+                          <electionParty>Green Party</electionParty>
+                          <votes>10000</votes>
+                        </data>
+                      </next>
+                    </next>
+                  </head>
+                  <size>3</size>
+                </candidates>
+              </data>
+              <next>
+                <data class="com.example.electionsinformationsystem.models.Election" reference="../../data/candidates/head/next/next/data/politician/electionRecord/head/next/data"/>
+              </next>
+            </head>
+            <size>2</size>
           </electionRecord>
         </data>
+        <next>
+          <data class="com.example.electionsinformationsystem.models.Politician" reference="../../data/electionRecord/head/data/candidates/head/next/next/data/politician"/>
+          <next>
+            <data class="com.example.electionsinformationsystem.models.Politician" reference="../../../data/electionRecord/head/data/candidates/head/data/politician"/>
+          </next>
+        </next>
       </head>
-      <size>1</size>
+      <size>3</size>
     </com.example.electionsinformationsystem.models.LinkedList>
     <com.example.electionsinformationsystem.models.LinkedList>
-      <size>0</size>
+      <head>
+        <data class="com.example.electionsinformationsystem.models.Election" reference="../../../com.example.electionsinformationsystem.models.LinkedList/head/data/electionRecord/head/data"/>
+        <next>
+          <data class="com.example.electionsinformationsystem.models.Election" reference="../../../../com.example.electionsinformationsystem.models.LinkedList/head/data/electionRecord/head/data/candidates/head/next/next/data/politician/electionRecord/head/next/data"/>
+          <next>
+            <data class="com.example.electionsinformationsystem.models.Election" reference="../../../../../com.example.electionsinformationsystem.models.LinkedList/head/data/electionRecord/head/data/candidates/head/next/next/data/politician/electionRecord/head/next/next/data"/>
+          </next>
+        </next>
+      </head>
+      <size>3</size>
     </com.example.electionsinformationsystem.models.LinkedList>
   </object-array>
 </object-stream>

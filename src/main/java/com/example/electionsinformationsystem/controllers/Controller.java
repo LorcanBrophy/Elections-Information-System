@@ -114,7 +114,7 @@ public class Controller {
 
     // search fields
     private String selectedSearchFilterPolitician = "All (Name, Party, County)";
-    private final String selectedSortOptionPolitician = "Name (A-Z)";
+    private String selectedSortOptionPolitician = "Name (A-Z)";
 
     private String selectedSearchFilterElection = "All (Type, Date)";
     private String selectedSortOptionElection = "Type (A-Z)";
@@ -252,7 +252,7 @@ public class Controller {
 
         // save the selections
         selectedSearchFilterPolitician = selectedFilter;
-        selectedSortOptionElection = selectedSort;
+        selectedSortOptionPolitician = selectedSort;
     }
     
     @FXML
@@ -325,10 +325,7 @@ public class Controller {
             if (shouldAdd && notAlreadyAdded(matches, partialMatch)) matches.add(partialMatch);
         }
 
-        // 3. sort matches
-
-        // TODO sort matches
-        sortPoliticianSearch(matches, selectedSortOptionPolitician);
+        // TODO 3. sort matches
 
         // add to display
         for (Politician politician : matches) {
@@ -337,42 +334,22 @@ public class Controller {
     }
 
     @FXML
-    private void sortPoliticianSearch(LinkedList<Politician> matches, String selectedSortOption) {
-        //TODO MAKE SORT LOGIC
-    }
-
-    @FXML
     public void onAddPolitician() {
         Politician newPolitician = politicianDialog(null);
         if (newPolitician == null) return;
 
-        // name hash table, no duplicated names
-        nameHashTable.put(newPolitician.getPoliticianName().toLowerCase(), newPolitician);
+        addPoliticianToDataStructures(newPolitician);
 
-        // party hash table
-        LinkedList<Politician> partyList = partyHashTable.get(newPolitician.getPoliticalParty().toLowerCase());
-        if (partyList == null) {
-            partyList = new LinkedList<>();
-            partyHashTable.put(newPolitician.getPoliticalParty().toLowerCase(), partyList);
-        }
-        partyList.add(newPolitician);
-
-        // home county hash table
-        LinkedList<Politician> countyList = countyHashTable.get(newPolitician.getHomeCounty().toLowerCase());
-        if (countyList == null) {
-            countyList = new LinkedList<>();
-            countyHashTable.put(newPolitician.getHomeCounty().toLowerCase(), countyList);
-        }
-        countyList.add(newPolitician);
-
-
-        politicianLinkedList.add(newPolitician);
         politicianListView.getItems().add(newPolitician);
 
         System.out.println("Number of politicians: " + politicianLinkedList.size());
         System.out.println(politicianLinkedList.display());
-        //nameHashTable.printTable();
-        //countyHashTable.printTable();
+//        System.out.println("Politician Name Hash Table");
+//        nameHashTable.printTable();
+//        System.out.println("Politician Party Hash Table");
+//        partyHashTable.printTable();
+//        System.out.println("Politician County Hash Table");
+//        countyHashTable.printTable();
     }
 
     @FXML
@@ -526,10 +503,7 @@ public class Controller {
             if (shouldAdd && notAlreadyAdded(matches, partialMatch)) matches.add(partialMatch);
         }
 
-        // 3. sort matches
-
-        // TODO sort matches
-        sortElectionSearch(matches, selectedSortOptionElection);
+        // TODO 3. sort matches
 
         // add to display
         for (Election election : matches) {
@@ -540,42 +514,12 @@ public class Controller {
     }
 
     @FXML
-    private void sortElectionSearch(LinkedList<Election> matches, String selectedSortOption) {
-        //TODO MAKE SORT LOGIC
-    }
-
-    @FXML
     public void onAddElection() {
         // open the election dialog to create a new election
         Election newElection = electionDialog(null);
         if (newElection == null) return; // if user cancels dialog, do nothing
 
-        // get the linked list of elections for this type from the hash table
-        LinkedList<Election> electionTypeList = electionTypeHashTable.get(newElection.getElectionType());
-
-        // if no list exists for this type, create one and store it
-        if (electionTypeList == null) {
-            electionTypeList = new LinkedList<>();
-            electionTypeHashTable.put(newElection.getElectionType(), electionTypeList);
-        }
-
-        // add new election to linked list
-        electionTypeList.add(newElection);
-
-        // get the linked list of elections for this date from the hash table
-        LinkedList<Election> electionDateList = electionDateHashTable.get(newElection.getElectionDate());
-
-        // If no list exists for this date, create one and store it
-        if (electionDateList == null) {
-            electionDateList = new LinkedList<>();
-            electionDateHashTable.put(newElection.getElectionDate(), electionDateList);
-        }
-
-        // add new election to linked list
-        electionDateList.add(newElection);
-
-        // add the new election to the linked list
-        electionLinkedList.add(newElection);
+        addElectionToDataStructures(newElection);
 
         // add the new election to the list view
         electionListView.getItems().add(newElection);
@@ -583,11 +527,10 @@ public class Controller {
         // debug
         System.out.println("Number of elections: " + electionLinkedList.size());
         System.out.println(electionLinkedList.display());
-        //System.out.println(newElection.toString());
-        //System.out.println("Election Type Hash Table");
-        //electionTypeHashTable.printTable();
-        //System.out.println("Election Date Hash Table");
-        //electionDateHashTable.printTable();
+//        System.out.println("Election Type Hash Table");
+//        electionTypeHashTable.printTable();
+//        System.out.println("Election Date Hash Table");
+//        electionDateHashTable.printTable();
     }
 
     @FXML
@@ -1135,35 +1078,38 @@ public class Controller {
         return dialog.showAndWait().orElse(null);
     }
 
+    private String showSelectionDialog(String title, String header, String prefill, String... options) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        dialog.setHeaderText(header);
+        dialog.setGraphic(null);
+        applyStylesheet(dialog.getDialogPane());
+
+        ComboBox<String> combo = new ComboBox<>();
+        combo.getItems().addAll(options);
+
+        return showComboDialog(combo, dialog, prefill);
+    }
+
     @FXML
     private String politicianFilterDialog(String prefillFilter) {
-        //searchFilterSortDialog(prefillFilter, "Search Filters","Select Filters for Search")
-        Dialog<String> filterDialog = new Dialog<>();
-        filterDialog.setTitle("Search Filters");
-        filterDialog.setHeaderText("Select Filters for Search");
-        filterDialog.setGraphic(null);
-        applyStylesheet(filterDialog.getDialogPane());
-        ComboBox<String> filterCombo = new ComboBox<>();
-        filterCombo.getItems().addAll(
+        return showSelectionDialog(
+                "Search Filters",
+                "Select Filters for Search",
+                prefillFilter,
                 "All (Name, Party, County)",
                 "Name Only",
                 "Party Only",
                 "County Only"
         );
-
-        return showComboDialog(filterCombo, filterDialog, prefillFilter);
     }
 
     @FXML
     private String politicianSortDialog(String prefillSort) {
-        Dialog<String> sortDialog = new Dialog<>();
-        sortDialog.setTitle("Sort Options");
-        sortDialog.setHeaderText("Select Sort Method");
-        sortDialog.setGraphic(null);
-        applyStylesheet(sortDialog.getDialogPane());
-
-        ComboBox<String> sortCombo = new ComboBox<>();
-        sortCombo.getItems().addAll(
+        return showSelectionDialog(
+                "Sort Options",
+                "Select Sort Method",
+                prefillSort,
                 "Name (A-Z)",
                 "Name (Z-A)",
                 "Party (A-Z)",
@@ -1171,55 +1117,32 @@ public class Controller {
                 "Date of Birth (Oldest first)",
                 "Date of Birth (Youngest first)"
         );
-
-        return showComboDialog(sortCombo, sortDialog, prefillSort);
     }
 
     @FXML
     private String electionFilterDialog(String prefillFilter) {
-        Dialog<String> filterDialog = new Dialog<>();
-        filterDialog.setTitle("Search Filters");
-        filterDialog.setHeaderText("Select Filters for Search");
-        filterDialog.setGraphic(null);
-        applyStylesheet(filterDialog.getDialogPane());
-
-        ComboBox<String> filterCombo = new ComboBox<>();
-        filterCombo.getItems().addAll(
+        return showSelectionDialog(
+                "Search Filters",
+                "Select Filters for Search",
+                prefillFilter,
                 "All (Type, Date)",
                 "Election Type Only",
                 "Date of Election Only"
         );
-
-        return showComboDialog(filterCombo, filterDialog, prefillFilter);
     }
 
     @FXML
     private String electionSortDialog(String prefillSort) {
-        Dialog<String> sortDialog = new Dialog<>();
-        sortDialog.setTitle("Sort Options");
-        sortDialog.setHeaderText("Select Sort Method");
-        sortDialog.setGraphic(null);
-        applyStylesheet(sortDialog.getDialogPane());
-
-        ComboBox<String> sortCombo = new ComboBox<>();
-        sortCombo.getItems().addAll(
+        return showSelectionDialog(
+                "Sort Options",
+                "Select Sort Method",
+                prefillSort,
                 "Type (A-Z)",
                 "Type (Z-A)",
                 "Date (Oldest first)",
                 "Date (Newest first)"
         );
-
-        return showComboDialog(sortCombo, sortDialog, prefillSort);
     }
-
-   /* @FXML
-    private String searchFilterSortDialog(String prefill, String title, String header) {
-        Dialog<String> filterDialog = new Dialog<>();
-        filterDialog.setTitle(title);
-        filterDialog.setHeaderText(header);
-        filterDialog.setGraphic(null);
-        applyStylesheet(filterDialog.getDialogPane());
-    }*/
 
     private <T> boolean notAlreadyAdded(LinkedList<T> list, T item) {
         for (T existing : list) {
@@ -1244,13 +1167,81 @@ public class Controller {
         }
     }
 
+    // adds politicians to linked list and hash tables (used when making and loading politician)
+    private void addPoliticianToDataStructures(Politician politician) {
+
+        // add the politician to linked list
+        politicianLinkedList.add(politician);
+
+        String nameKey = politician.getPoliticianName().toLowerCase();
+        String partyKey = politician.getPoliticalParty().toLowerCase();
+        String countyKey = politician.getHomeCounty().toLowerCase();
+
+        // name hash table
+        nameHashTable.put(nameKey, politician);
+
+        // party hash table
+        LinkedList<Politician> partyList = partyHashTable.get(partyKey);
+        if (partyList == null) {
+            partyList = new LinkedList<>();
+            partyHashTable.put(partyKey, partyList);
+        }
+        partyList.add(politician);
+
+        // home county hash table
+        LinkedList<Politician> countyList = countyHashTable.get(countyKey);
+        if (countyList == null) {
+            countyList = new LinkedList<>();
+            countyHashTable.put(countyKey, countyList);
+        }
+        countyList.add(politician);
+    }
+
+    // adds elections to linked list and hash tables (used when making and loading election)
+    private void addElectionToDataStructures(Election election) {
+
+        // add the new election to linked list
+        electionLinkedList.add(election);
+
+        String typeKey = election.getElectionType().toLowerCase();
+        String dateKey = election.getElectionDate();
+
+        // ELECTION TYPE HASH TABLE
+
+        // get the linked list of elections for this type from the hash table
+        LinkedList<Election> electionTypeList = electionTypeHashTable.get(typeKey);
+
+        // if no list exists for this type, create one and store it
+        if (electionTypeList == null) {
+            electionTypeList = new LinkedList<>();
+            electionTypeHashTable.put(typeKey, electionTypeList);
+        }
+
+        // add new election to linked list
+        electionTypeList.add(election);
+
+        // ELECTION DATE HASH TABLE
+
+        // get the linked list of elections for this date from the hash table
+        LinkedList<Election> electionDateList = electionDateHashTable.get(dateKey);
+
+        // if no list exists for this date, create one and store it
+        if (electionDateList == null) {
+            electionDateList = new LinkedList<>();
+            electionDateHashTable.put(dateKey, electionDateList);
+        }
+
+        // add new election to linked list
+        electionDateList.add(election);
+    }
+
     // SAVING AND LOADING
     public void save() throws Exception {
         XStream xstream = new XStream(new DomDriver());
-        ObjectOutputStream os = xstream.createObjectOutputStream(new FileWriter("elections.xml"));
+        ObjectOutputStream out = xstream.createObjectOutputStream(new FileWriter("elections.xml"));
         Object[] mainData = new Object[]{politicianLinkedList, electionLinkedList};
-        os.writeObject(mainData);
-        os.close();
+        out.writeObject(mainData);
+        out.close();
     }
 
     public void load() throws Exception {
@@ -1265,11 +1256,11 @@ public class Controller {
         };
 
         XStream xstream = new XStream(new DomDriver());
-        XStream.setupDefaultSecurity(xstream);
         xstream.allowTypes(classes);
-        ObjectInputStream is = xstream.createObjectInputStream(new FileReader("elections.xml"));
-        Object[] mainData = (Object[]) is.readObject();
-        is.close();
+
+        ObjectInputStream in = xstream.createObjectInputStream(new FileReader("elections.xml"));
+        Object[] mainData = (Object[]) in.readObject();
+        in.close();
 
         // clears tables and linked lists in case of bomboclaat duplication type sh
         politicianLinkedList.clear();
@@ -1286,51 +1277,15 @@ public class Controller {
 
         // REBUILDING POLITICIAN HASH TABLES
         if (loadedPoliticians != null) {
-            for (Politician p : loadedPoliticians) {
-                politicianLinkedList.add(p);
-
-                // rebuild name hash table
-                nameHashTable.put(p.getPoliticianName().toLowerCase(), p);
-                //.put(key, values from that key) we learning type shii
-
-                // rebuild party hash table
-                LinkedList<Politician> partyList = partyHashTable.get(p.getPoliticalParty().toLowerCase());
-                if (partyList == null) {
-                    partyList = new LinkedList<>();
-                    partyHashTable.put(p.getPoliticalParty().toLowerCase(), partyList);
-                }
-                partyList.add(p);
-
-                // rebuild county hash table
-                LinkedList<Politician> countyList = countyHashTable.get(p.getHomeCounty().toLowerCase());
-                if (countyList == null) {
-                    countyList = new LinkedList<>();
-                    countyHashTable.put(p.getHomeCounty().toLowerCase(), countyList);
-                }
-                countyList.add(p);
+            for (Politician politician : loadedPoliticians) {
+                addPoliticianToDataStructures(politician);
             }
         }
 
         // REBUILDING ELECTION HASH TABLESS
         if (loadedElections != null) {
-            for (Election e : loadedElections) {
-                electionLinkedList.add(e);
-
-                // rebuild type hash table
-                LinkedList<Election> typeList = electionTypeHashTable.get(e.getElectionType().toLowerCase());
-                if (typeList == null) {
-                    typeList = new LinkedList<>();
-                    electionTypeHashTable.put(e.getElectionType().toLowerCase(), typeList);
-                }
-                typeList.add(e);
-
-                // rebuild date hash table
-                LinkedList<Election> dateList = electionDateHashTable.get(e.getElectionDate().toLowerCase());
-                if (dateList == null) {
-                    dateList = new LinkedList<>();
-                    electionDateHashTable.put(e.getElectionDate().toLowerCase(), dateList);
-                }
-                dateList.add(e);
+            for (Election election : loadedElections) {
+                addElectionToDataStructures(election);
             }
         }
     }

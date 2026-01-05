@@ -39,6 +39,7 @@ public class Candidate {
         this.votes = votes;
     }
 
+    // used for table view
     public String getPoliticianName() {
         return politician.getPoliticianName();
     }

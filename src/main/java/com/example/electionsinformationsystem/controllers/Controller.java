@@ -179,9 +179,12 @@ public class Controller {
                     // show candidate name and votes
                     setText(candidate.getPolitician().getPoliticianName() + " - " + candidate.getVotes() + " votes");
 
-                    // highlight the top candidate
-                    if (getIndex() == 0) {
-                        getStyleClass().add("top-candidate");
+                    // highlight the top candidates
+                    Election currentElection = electionListView.getSelectionModel().getSelectedItem();
+                    if (currentElection != null && getIndex() < currentElection.getNumWinners()) {
+                        if (!getStyleClass().contains("top-candidate")) {
+                            getStyleClass().add("top-candidate");
+                        }
                     } else {
                         getStyleClass().removeAll("top-candidate");
                     }

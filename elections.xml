@@ -56,7 +56,7 @@
                                     <electionType>General</electionType>
                                     <location>Dún Laoghaire</location>
                                     <electionDate>2027-01-01</electionDate>
-                                    <numWinners>25</numWinners>
+                                    <numWinners>2</numWinners>
                                     <candidates>
                                       <head>
                                         <data class="com.example.electionsinformationsystem.models.Candidate">

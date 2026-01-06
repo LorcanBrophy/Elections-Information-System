@@ -365,6 +365,10 @@ public class Controller {
         Politician newPolitician = politicianDialog(null);
         if (newPolitician == null) return;
 
+        // enforce unique politician name
+        String key = newPolitician.getPoliticianName().toLowerCase();
+        if (nameHashTable.get(key) != null) return;
+
         addPoliticianToDataStructures(newPolitician);
 
         sortPoliticians();
@@ -379,29 +383,40 @@ public class Controller {
 //        countyHashTable.printTable();
     }
 
-    @FXML
+     @FXML
     public void onEditPolitician() {
+
+        // get currently selected politician from the list
         Politician selected = politicianListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
+        // store old values for hash table updates
         String oldName = selected.getPoliticianName().toLowerCase();
         String oldParty = selected.getPoliticalParty().toLowerCase();
         String oldCounty = selected.getHomeCounty().toLowerCase();
 
+        // create politician
         Politician edited = politicianDialog(selected);
         if (edited == null) return;
 
+        // enforce unique politician name
+        String newName = edited.getPoliticianName().toLowerCase();
+        if (!oldName.equals(newName) && nameHashTable.get(newName) != null) return;
+
+        // update name hash table if name changed
         if (!oldName.equals(edited.getPoliticianName().toLowerCase())) {
             nameHashTable.remove(oldName);
             nameHashTable.put(edited.getPoliticianName().toLowerCase(), edited);
         }
 
+        // update party hash table if party changed
         if (!oldParty.equals(edited.getPoliticalParty().toLowerCase())) {
 
             // remove from old list
             LinkedList<Politician> oldPartyList = partyHashTable.get(oldParty);
             oldPartyList.remove(selected);
 
+            // add to new party list and if none exist create new
             LinkedList<Politician> newPartyList = partyHashTable.get(edited.getPoliticalParty().toLowerCase());
 
             if (newPartyList == null) {
@@ -411,10 +426,14 @@ public class Controller {
             newPartyList.add(edited);
         }
 
+        // update county hash table if county changed
         if (!oldCounty.equals(edited.getHomeCounty().toLowerCase())) {
+
+            // remove from old list
             LinkedList<Politician> oldCountyList = countyHashTable.get(oldCounty);
             oldCountyList.remove(selected);
 
+            // add to new county list and if none exist create new
             LinkedList<Politician> newCountyList = countyHashTable.get(edited.getHomeCounty().toLowerCase());
 
             if (newCountyList == null) {
@@ -424,8 +443,10 @@ public class Controller {
             newCountyList.add(edited);
         }
 
+        // sort politician list after edit
         sortPoliticians();
 
+        // debug
         System.out.println("Number of politicians: " + politicianLinkedList.size());
         System.out.println(politicianLinkedList.display());
     }
@@ -587,7 +608,7 @@ public class Controller {
 
             // remove from old list
             LinkedList<Election> oldElectionTypeList = electionTypeHashTable.get(oldElectionType);
-            oldElectionTypeList.remove(selected);
+            if (oldElectionTypeList != null) oldElectionTypeList.remove(selected);
 
             // gets new list
             LinkedList<Election> newElectionTypeList = electionTypeHashTable.get(edited.getElectionType());
@@ -605,7 +626,7 @@ public class Controller {
 
             // remove from old list
             LinkedList<Election> oldElectionDateList = electionDateHashTable.get(oldElectionDate);
-            oldElectionDateList.remove(selected);
+            if (oldElectionDateList != null) oldElectionDateList.remove(selected);
 
             // gets new list
             LinkedList<Election> newElectionDateList = electionDateHashTable.get(edited.getElectionDate());

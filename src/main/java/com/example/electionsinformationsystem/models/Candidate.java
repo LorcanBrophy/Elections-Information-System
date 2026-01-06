@@ -11,7 +11,7 @@ public class Candidate {
     public Candidate(Politician politician, String electionParty, int votes) {
         this.politician = politician;
         this.electionParty = electionParty;
-        this.votes = votes;
+        setVotes(votes);
     }
 
     // getters and setters
@@ -36,7 +36,7 @@ public class Candidate {
     }
 
     public void setVotes(int votes) {
-        this.votes = votes;
+        this.votes = (votes < 0) ? 0 : votes;
     }
 
     // used for table view

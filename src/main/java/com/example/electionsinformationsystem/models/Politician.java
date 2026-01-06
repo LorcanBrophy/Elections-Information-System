@@ -5,7 +5,7 @@ public class Politician {
     // fields
     private String politicianName;
     private String dateOfBirth;
-    private String politicalParty; // should default to 'Independent' if empty, in dialog just make "if null, set Independent"
+    private String politicalParty;
     private String homeCounty;
     private String photoUrl;
     private final LinkedList<Election> electionRecord = new LinkedList<>();

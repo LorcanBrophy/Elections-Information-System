@@ -240,7 +240,7 @@ public class Controller {
         });
 
 
-        themePicker.getItems().addAll("Light Mode", "Dark Mode", "Cotton Candy");
+        themePicker.getItems().addAll("Light Mode", "Dark Mode", "Cherry Blossom");
         themePicker.getSelectionModel().selectFirst();
     }
 
@@ -345,12 +345,19 @@ public class Controller {
             if (shouldAdd && notAlreadyAdded(matches, partialMatch)) matches.add(partialMatch);
         }
 
-        // TODO 3. sort matches
+        // sort matches
 
-        // add to display
-        for (Politician politician : matches) {
-            politicianListView.getItems().add(politician);
+        Object[] temp = matches.toArray();
+        Politician[] sorted = new Politician[temp.length];
+
+        for (int i = 0; i < temp.length; i++) {
+            sorted[i] = (Politician) temp[i];
         }
+
+        sortPoliticianArray(sorted);
+
+        // display
+        politicianListView.getItems().addAll(sorted);
     }
 
     @FXML
@@ -527,12 +534,18 @@ public class Controller {
             if (shouldAdd && notAlreadyAdded(matches, partialMatch)) matches.add(partialMatch);
         }
 
-        // TODO 3. sort matches
+        // sort matches
+        Object[] temp = matches.toArray();
+        Election[] sorted = new Election[temp.length];
 
-        // add to display
-        for (Election election : matches) {
-            electionListView.getItems().add(election);
+        for (int i = 0; i < temp.length; i++) {
+            sorted[i] = (Election) temp[i];
         }
+
+        sortElectionArray(sorted);
+
+        // display
+        electionListView.getItems().addAll(sorted);
     }
 
     @FXML
@@ -726,8 +739,6 @@ public class Controller {
 
     @FXML
     private void sortPoliticians() {
-        if (selectedSortOptionPolitician.isEmpty()) return;
-
         // convert linked list to array
         Object[] temp = politicianLinkedList.toArray();
         Politician[] politicians = new Politician[temp.length];
@@ -735,7 +746,16 @@ public class Controller {
             politicians[i] = (Politician) temp[i];
         }
 
-        // choose which merge sort to apply based on the selection
+        sortPoliticianArray(politicians);
+
+        // update the list view
+        politicianListView.getItems().clear();
+        politicianListView.getItems().addAll(politicians);
+    }
+
+    private void sortPoliticianArray(Politician[] politicians) {
+        if (selectedSortOptionPolitician.isEmpty()) return;
+
         switch (selectedSortOptionPolitician) {
             case "Name (A-Z)":
                 mergeSortByName(politicians, true);
@@ -764,14 +784,10 @@ public class Controller {
             default:
                 break;
         }
-
-        // update the list view
-        politicianListView.getItems().clear();
-        politicianListView.getItems().addAll(politicians);
     }
 
     // name sorting
-    public static void mergeSortByName(Politician[] politicians, boolean AtoZ) {
+    private static void mergeSortByName(Politician[] politicians, boolean AtoZ) {
         int length = politicians.length;
         if (length <= 1) return;
 
@@ -799,7 +815,7 @@ public class Controller {
     }
 
     // party sorting
-    public static void mergeSortByParty(Politician[] politicians, boolean AtoZ) {
+    private static void mergeSortByParty(Politician[] politicians, boolean AtoZ) {
         int length = politicians.length;
         if (length <= 1) return;
 
@@ -827,7 +843,7 @@ public class Controller {
     }
 
     // county sorting
-    public static void mergeSortByCounty(Politician[] politicians, boolean AtoZ) {
+    private static void mergeSortByCounty(Politician[] politicians, boolean AtoZ) {
         int length = politicians.length;
         if (length <= 1) return;
 
@@ -855,7 +871,7 @@ public class Controller {
     }
 
     // dob sorting
-    public static void mergeSortByDOB(Politician[] politicians, boolean oldestFirst) {
+    private static void mergeSortByDOB(Politician[] politicians, boolean oldestFirst) {
         int length = politicians.length;
         if (length <= 1) return;
 
@@ -885,7 +901,6 @@ public class Controller {
 
     @FXML
     private void sortElections() {
-        if (selectedSortOptionElection.isEmpty()) return;
 
         // convert linked list to array
         Object[] temp = electionLinkedList.toArray();
@@ -893,6 +908,17 @@ public class Controller {
         for (int i = 0; i < temp.length; i++) {
             elections[i] = (Election) temp[i];
         }
+
+        sortElectionArray(elections);
+
+        // update the list view
+        electionListView.getItems().clear();
+        electionListView.getItems().addAll(elections);
+    }
+
+    @FXML
+    private void sortElectionArray(Election[] elections) {
+        if (selectedSortOptionElection.isEmpty()) return;
 
         // choose which merge sort to apply based on the selection
         switch (selectedSortOptionElection) {
@@ -911,14 +937,11 @@ public class Controller {
             default:
                 break;
         }
-
-        // update the list view
-        electionListView.getItems().clear();
-        electionListView.getItems().addAll(elections);
     }
 
+
     // type sorting
-    public static void mergeSortByType(Election[] elections, boolean AtoZ) {
+    private static void mergeSortByType(Election[] elections, boolean AtoZ) {
         int length = elections.length;
         if (length <= 1) return;
 
@@ -946,7 +969,7 @@ public class Controller {
     }
 
     // date sorting
-    public static void mergeSortByDate(Election[] elections, boolean oldestFirst) {
+    private static void mergeSortByDate(Election[] elections, boolean oldestFirst) {
         int length = elections.length;
         if (length <= 1) return;
 
@@ -996,7 +1019,7 @@ public class Controller {
     }
 
     // vote sorting
-    public static void mergeSortByVotes(Candidate[] candidates) {
+    private static void mergeSortByVotes(Candidate[] candidates) {
         int length = candidates.length;
         if (length <= 1) return;
 
@@ -1036,7 +1059,7 @@ public class Controller {
 
         String cssFile = switch (selectedTheme) {
             case "Dark Mode" -> "/com/example/electionsinformationsystem/darkStyle.css";
-            case "Cotton Candy" -> "/com/example/electionsinformationsystem/pinkStyle.css";
+            case "Cherry Blossom" -> "/com/example/electionsinformationsystem/pinkStyle.css";
             default -> "/com/example/electionsinformationsystem/lightStyle.css";
         };
 

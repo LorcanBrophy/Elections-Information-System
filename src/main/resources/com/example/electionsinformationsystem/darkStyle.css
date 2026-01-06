@@ -179,3 +179,15 @@
     -fx-prompt-text-fill: #a6a4a4;
     -fx-font-size: 16px;
 }
+
+.top-candidate {
+    -fx-background-color: #f8e38b;
+    -fx-font-weight: bold;
+    -fx-text-fill: #131313;
+}
+
+.top-candidate:hover {
+    -fx-background-color: #ead34f;
+    -fx-font-weight: bold;
+    -fx-text-fill: #131313;
+}
